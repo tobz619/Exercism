@@ -7,9 +7,13 @@ def create_inventory(items):
     :param items: list - list of items to create an inventory from.
     :return: dict - the inventory dictionary.
     """
-
-    pass
-
+    count_dict = {}
+    for item in items:
+        if item not in count_dict:
+            count_dict[item] = 1
+        else: 
+            count_dict[item] += 1
+    return count_dict
 
 def add_items(inventory, items):
     """Add or increment items in inventory using elements from the items `list`.
@@ -19,7 +23,14 @@ def add_items(inventory, items):
     :return: dict - the inventory updated with the new items.
     """
 
-    pass
+    for item in items:
+        if item in inventory:
+            inventory[item] += 1
+        else:
+            inventory[item] = 1
+    return inventory
+
+print (add_items({"coal":1}, ["wood", "iron", "coal", "wood"]))
 
 
 def decrement_items(inventory, items):
@@ -30,8 +41,14 @@ def decrement_items(inventory, items):
     :return: dict - updated inventory with items decremented.
     """
 
-    pass
+    for item in items:
+        if inventory[item] == 0:
+            inventory[item] = 0
+        elif item in inventory:
+            inventory[item] -= 1
+    return inventory
 
+print (decrement_items({"coal":3, "diamond":1, "iron":5}, ["diamond", "coal", "iron", "iron"]))
 
 def remove_item(inventory, item):
     """Remove item from inventory if it matches `item` string.
@@ -41,7 +58,9 @@ def remove_item(inventory, item):
     :return: dict - updated inventory with item removed. Current inventory if item does not match.
     """
 
-    pass
+    if item in inventory:
+        del inventory[item]
+    return inventory
 
 
 def list_inventory(inventory):
@@ -51,4 +70,10 @@ def list_inventory(inventory):
     :return: list of tuples - list of key, value pairs from the inventory dictionary.
     """
 
-    pass
+    new_list = []
+    for item in inventory:
+        if inventory[item] > 0:
+            new_list.append((item, inventory[item]))
+    return new_list
+
+print (list_inventory({"coal":7, "wood":11, "diamond":2, "iron":7, "silver":0}))
