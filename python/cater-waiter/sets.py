@@ -56,8 +56,15 @@ def categorize_dish(dish_name, dish_ingredients):
 
     """
 
-    pass
-
+    set_ingr = set(dish_ingredients)
+    cat_list = [VEGAN, VEGETARIAN, PALEO, KETO, OMNIVORE]
+    str_list = ["VEGAN", "VEGETARIAN", "PALEO", "KETO" , "OMNIVORE"]
+    index = 0
+    while len(set_ingr) > 0:
+        set_ingr = set_ingr.difference(set(cat_list[index]))
+        index = index + 1
+    if len(set_ingr) == 0:
+        return f"{dish_name}: {str_list[index-1]}"
 
 def tag_special_ingredients(dish):
     """Compare `dish` ingredients to `SPECIAL_INGREDIENTS`.
@@ -70,7 +77,9 @@ def tag_special_ingredients(dish):
     SPECIAL_INGREDIENTS constant imported from `sets_categories_data.py`.
     """
 
-    pass
+    name, ingr = dish
+    specials = set(ingr).intersection(SPECIAL_INGREDIENTS)
+    return (name, specials)
 
 
 def compile_ingredients(dishes):
@@ -81,9 +90,11 @@ def compile_ingredients(dishes):
 
     This function should return a `set` of all ingredients from all listed dishes.
     """
-
-    pass
-
+    
+    superset = set()
+    for ingrs in dishes:
+        superset = superset.union(ingrs)
+    return superset
 
 def separate_appetizers(dishes, appetizers):
     """Determine which `dishes` are designated `appetizers` and remove them.
@@ -96,7 +107,17 @@ def separate_appetizers(dishes, appetizers):
     Either list could contain duplicates and may require de-duping.
     """
 
-    pass
+    return set(dishes).difference(appetizers)
+
+dishes =    ['Avocado Deviled Eggs','Flank Steak with Chimichurri and Asparagus', 'Kingfish Lettuce Cups',
+             'Grilled Flank Steak with Caesar Salad','Vegetarian Khoresh Bademjan','Avocado Deviled Eggs',
+             'Barley Risotto','Kingfish Lettuce Cups']
+          
+appetizers = ['Kingfish Lettuce Cups','Avocado Deviled Eggs','Satay Steak Skewers',
+              'Dahi Puri with Black Chickpeas','Avocado Deviled Eggs','Asparagus Puffs',
+              'Asparagus Puffs']
+              
+print (separate_appetizers(dishes, appetizers))
 
 
 def singleton_ingredients(dishes, intersection):
@@ -114,4 +135,12 @@ def singleton_ingredients(dishes, intersection):
     The function should return a `set` of ingredients that only appear in a single dish.
     """
 
-    pass
+    ingrs = set()
+    for dish in dishes:
+        ingrs = set(dish.union(set(ingrs))).symmetric_difference(intersection)
+    
+    return ingrs.difference(intersection)
+
+from sets_categories_data import example_dishes, EXAMPLE_INTERSECTION
+
+print (singleton_ingredients(example_dishes, EXAMPLE_INTERSECTION))
