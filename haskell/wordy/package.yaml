@@ -6,10 +6,12 @@ dependencies:
 
 library:
   exposed-modules: WordProblem
+  haskell.ghcMod.executablePath: "stack"
   source-dirs: src
-  ghc-options: -Wall
+  default-extensions: OverloadedStrings
   dependencies:
   - megaparsec
+  - text
   # - bar       # want to use in your solution.
 
 tests:

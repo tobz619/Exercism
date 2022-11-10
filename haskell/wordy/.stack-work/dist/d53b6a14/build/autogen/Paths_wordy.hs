@@ -31,7 +31,7 @@ version = Version [1,5,0,8] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\bin"
-libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\lib\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8-AFr9tJPnXS8DfNmEYiVLKe"
+libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\lib\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8-KLi6XeCmfFeEJBnHcYmJbY"
 dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\lib\\x86_64-windows-ghc-9.0.2"
 datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\share\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8"
 libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\wordy\\.stack-work\\install\\7410ad2e\\libexec\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8"

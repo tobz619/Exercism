@@ -1,16 +1,27 @@
+{-# OPTIONS -Wunused-imports #-}
+
 module WordProblem (answer) where
 
+import Text.Megaparsec.Char
 import Text.Megaparsec
-import Text.Megapparsec.Char
 import Data.Void
 import Data.Text (Text)
+import qualified Text.Megaparsec.Char.Lexer as L
 
-type Parser = Parsec Void String
+type Parser = Parsec Void Text
 
 answer :: String -> Maybe Integer
-answer problem = error "You need to implement this function."
+answer problem = undefined
 
-whatIsParser :: Parser Char
-whatIsParser = undefined
+whatIsParser :: Parser Text
+whatIsParser = string' "What is " :: Parser Text
 
-something = parseTest (satisfy (== 'a') :: Parser Char) "bvc"
+ws :: Parser ()
+ws = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
+
+lexeme = L.lexeme ws
+
+integerParser :: Parser Integer
+integerParser = undefined
+
+something = parseTest (satisfy (== 'a') :: Parser Char) ""
