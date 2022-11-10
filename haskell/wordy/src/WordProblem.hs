@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {-# OPTIONS -Wunused-imports #-}
 
 module WordProblem (answer) where
@@ -83,5 +82,4 @@ data Uri = Uri {uriScheme :: Text} deriving (Show, Eq)
 pUri :: Parser Uri
 pUri = do r <- pScheme
           _ <- char ':'
-          return (Uri r )
->>>>>>> 3c7711e91cd0f5c789e7126eb84c0c019fafba5e
+          return (Uri r)
