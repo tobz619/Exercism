@@ -58,6 +58,9 @@ stopMany x = many (char x) <* eof
 --
 -- scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]
 
+data Scheme = SchemeData | SchemeFile | SchemeFtp | SchemeHttps
+            | SchemeHttp | SchemeIrc | SchemeMailto deriving (Show, Eq, Enum)
+
 pSchemeF :: Parser Text
 pSchemeF =  string "data" <|> string "file" <|> string "ftp" <|>
            string "http" <|> string "https" <|> string "irc" <|>
@@ -91,19 +94,28 @@ data Authority = Authority { authUser :: Maybe (Text, Text)
 -- Uri {uriScheme = "irc"}
 pUri :: Parser Uri
 pUri = Uri <$> pScheme <* char ':'
-           <*> (pure <$> getUriAuth)
+           <*> (pure <$> getUriAuthA)
 
 getUriAuth :: Parser Authority
-getUriAuth = Authority <$> 
-                (optional . try $ do _ <- string "//"
-                                     user <- T.pack <$> some alphaNumChar
-                                     _ <- char ':'
-                                     pw <- T.pack <$> some alphaNumChar
-                                     _ <- char '@'
-                                     return (user,pw))
-                         <*> T.pack <$> some (alphaNumChar <|> char '.')
-                         <*> optional (char ':' *> L.decimal)
+getUriAuth = do 
+    void (string "//")
+    authUser <- optional . try $ do              -- (2)
+      user <- T.pack <$> some alphaNumChar       -- (3)
+      void (char ':')
+      password <- T.pack <$> some alphaNumChar
+      void (char '@')
+      return (user, password)
+    authHost <- T.pack <$> some (alphaNumChar <|> char '.')
+    authPort <- optional (char ':' *> L.decimal) -- (4)
+    return (Authority authUser authHost authPort)    -- (5)
 
-
-data Scheme = SchemeData | SchemeFile | SchemeFtp | SchemeHttps
-            | SchemeHttp | SchemeIrc | SchemeMailto deriving (Show, Eq, Enum)
+getUriAuthA :: Parser Authority
+getUriAuthA = Authority <$> user <*> host <*> port
+            where user = string "//" *> (optional . try $ do
+                            user <- T.pack <$> some alphaNumChar
+                            _ <- char ':'
+                            password <- T.pack <$> some alphaNumChar
+                            _ <- char '@'
+                            return (user, password))
+                  host = T.pack <$> some (alphaNumChar <|> char '.')
+                  port = optional (char ':' *> L.decimal) 
