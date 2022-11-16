@@ -20,6 +20,16 @@
   (major1) == 4 && (major2) <  17 || \
   (major1) == 4 && (major2) == 17 && (minor) <= 0)
 #endif /* MIN_VERSION_base */
+/* package implicit-hie-0.1.3.0 */
+#ifndef VERSION_implicit_hie
+#define VERSION_implicit_hie "0.1.3.0"
+#endif /* VERSION_implicit_hie */
+#ifndef MIN_VERSION_implicit_hie
+#define MIN_VERSION_implicit_hie(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  1 || \
+  (major1) == 0 && (major2) == 1 && (minor) <= 3)
+#endif /* MIN_VERSION_implicit_hie */
 /* package megaparsec-9.2.2 */
 #ifndef VERSION_megaparsec
 #define VERSION_megaparsec "9.2.2"

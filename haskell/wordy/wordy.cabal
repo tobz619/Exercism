@@ -10,7 +10,8 @@ build-type:     Simple
 
 library
   exposed-modules:
-      WordProblem
+      WordProblem ,
+      RunParser
   other-modules:
       Paths_wordy
   hs-source-dirs:
@@ -21,6 +22,7 @@ library
       base
     , megaparsec
     , text
+    , implicit-hie
   default-language: Haskell2010
 
 test-suite test

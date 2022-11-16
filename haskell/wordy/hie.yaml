@@ -1,7 +1,2 @@
 cradle:
   cabal:
-    - path: "test/Tests.hs"
-      component: "wordy:test:test"
-
-    - path: "src/WordProblem.hs"
-      component: "lib:wordy"

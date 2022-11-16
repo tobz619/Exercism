@@ -118,5 +118,4 @@ getUriAuthA = Authority <$> user <*> host <*> port
                             _ <- char '@'
                             return (user, password))
                   host = T.pack <$> some (alphaNumChar <|> char '.')
-                  port = optional (char ':' *> L.decimal) 
-
+                  port = optional (char ':' *> L.decimal)
