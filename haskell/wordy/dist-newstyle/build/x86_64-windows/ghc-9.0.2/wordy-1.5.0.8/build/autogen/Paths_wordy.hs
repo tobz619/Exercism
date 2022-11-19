@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/home/tobzdaman619/.cabal/bin"
-libdir     = "/home/tobzdaman619/.cabal/lib/aarch64-linux-ghc-9.4.2/wordy-1.5.0.8-inplace"
-dynlibdir  = "/home/tobzdaman619/.cabal/lib/aarch64-linux-ghc-9.4.2"
-datadir    = "/home/tobzdaman619/.cabal/share/aarch64-linux-ghc-9.4.2/wordy-1.5.0.8"
-libexecdir = "/home/tobzdaman619/.cabal/libexec/aarch64-linux-ghc-9.4.2/wordy-1.5.0.8"
-sysconfdir = "/home/tobzdaman619/.cabal/etc"
+bindir     = "C:\\cabal\\bin"
+libdir     = "C:\\cabal\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8-inplace"
+dynlibdir  = "C:\\cabal\\x86_64-windows-ghc-9.0.2"
+datadir    = "C:\\cabal\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8"
+libexecdir = "C:\\cabal\\wordy-1.5.0.8-inplace\\x86_64-windows-ghc-9.0.2\\wordy-1.5.0.8"
+sysconfdir = "C:\\cabal\\etc"
 
 getBinDir     = catchIO (getEnv "wordy_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "wordy_libdir")     (\_ -> return libdir)
@@ -68,7 +68,7 @@ joinFileName dir fname
   | otherwise                       = dir ++ pathSeparator : fname
 
 pathSeparator :: Char
-pathSeparator = '/'
+pathSeparator = '\\'
 
 isPathSeparator :: Char -> Bool
-isPathSeparator c = c == '/'
+isPathSeparator c = c == '/' || c == '\\'
