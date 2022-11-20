@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards   #-}
 
-module WordProblem (answer) where
+module WordProblem where
 
 import Control.Monad
 import qualified Control.Applicative

@@ -13,13 +13,6 @@ import qualified Data.Text as T
 
 type Parser = Parsec Void Text
 
-answer :: String -> Maybe Integer
-answer problem = undefined
-
-whatIsParser :: Parser Text
-whatIsParser = string' "What is " :: Parser Text
-
-
 ws :: Parser ()
 ws = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
 
@@ -69,11 +62,14 @@ pSchemeF =  string "data" <|> string "file" <|> string "ftp" <|>
 pSchemeC :: Parser Text
 pSchemeC = choice $ string <$> ["data","file","ftp","http","https","irc","mailto"]
 
-pScheme :: Parser Scheme
-pScheme = choice $ zipWith (<$) [SchemeData .. SchemeMailto] ["data","file","ftp","https","http","irc","mailto"]
+getScheme :: Parser Scheme
+getScheme = choice $ zipWith (<$) [SchemeData .. SchemeMailto] ["data","file","ftp","https","http","irc","mailto"]
 
 data Uri = Uri { uriScheme :: Scheme
                , uriAuthority :: Maybe Authority
+               , uriPath :: Text
+               , uriQuery :: Maybe Query
+               , uriFragment :: Maybe Fragment
                }
                deriving (Show, Eq)
 
@@ -93,11 +89,14 @@ data Authority = Authority { authUser :: Maybe (Text, Text)
 -- >>> parseTest pUri "irc:"
 -- Uri {uriScheme = "irc"}
 pUri :: Parser Uri
-pUri = Uri <$> pScheme <* char ':'
-           <*> (pure <$> getUriAuthA)
+pUri = (Uri <$> getScheme <* char ':'
+           <*> getUriAuthA
+           <*> (getSlash *> getPath)
+           <*> getQuery
+           <*> getFragment) <*eof
 
-getUriAuth :: Parser Authority
-getUriAuth = do 
+getUriAuth :: Parser (Maybe Authority)
+getUriAuth = optional $ do 
     void (string "//")
     authUser <- optional . try $ do              -- (2)
       user <- T.pack <$> some alphaNumChar       -- (3)
@@ -109,8 +108,8 @@ getUriAuth = do
     authPort <- optional (char ':' *> L.decimal) -- (4)
     return (Authority authUser authHost authPort)    -- (5)
 
-getUriAuthA :: Parser Authority
-getUriAuthA = Authority <$> user <*> host <*> port
+getUriAuthA :: Parser (Maybe Authority)
+getUriAuthA = optional . try $ Authority <$> user <*> host <*> port
             where user = string "//" *> (optional . try $ do
                             user <- T.pack <$> some alphaNumChar
                             _ <- char ':'
@@ -118,4 +117,21 @@ getUriAuthA = Authority <$> user <*> host <*> port
                             _ <- char '@'
                             return (user, password))
                   host = T.pack <$> some (alphaNumChar <|> char '.')
-                  port = optional (char ':' *> L.decimal)
+                  port = optional (char ':' *> L.decimal) 
+
+getSlash :: Parser (Maybe Char)
+getSlash = optional $ char '/'
+
+getPath :: Parser Text
+getPath =  T.pack <$> many alphaNumChar
+
+newtype Query = Query Text deriving (Show, Eq)
+
+getQuery :: Parser (Maybe Query)
+getQuery = optional $ Query <$> (T.pack <$> (char '?' *> many alphaNumChar))
+
+newtype Fragment = Fragment Text deriving (Show, Eq)
+
+getFragment :: Parser (Maybe Fragment)
+getFragment = optional $ Fragment <$> (T.pack <$> (char '#' *> many alphaNumChar))
+
