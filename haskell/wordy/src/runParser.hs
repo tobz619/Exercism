@@ -2,7 +2,8 @@
 
 module RunParser where
 
-import Control.Monad
+import Control.Monad.State.Strict
+import Control.Monad.Identity
 import qualified Control.Applicative
 import Text.Megaparsec hiding (State)
 import Text.Megaparsec.Char
@@ -11,12 +12,8 @@ import Data.Void
 import Data.Text (Text)
 import qualified Data.Text as T
 
+
 type Parser = Parsec Void Text
-
-ws :: Parser ()
-ws = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
-
-lexeme = L.lexeme ws
 
 integerParser :: Parser Integer
 integerParser = undefined
@@ -135,3 +132,71 @@ newtype Fragment = Fragment Text deriving (Show, Eq)
 getFragment :: Parser (Maybe Fragment)
 getFragment = optional $ Fragment <$> (T.pack <$> (char '#' *> many alphaNumChar))
 
+type ParState =  ParsecT Void Text (State String)
+
+parser0 :: ParState String
+parser0 = a <|> b
+      where a = "foo" <$ put "branch A"
+            b = get <* put "branch B"
+
+
+parser1 :: ParState String
+parser1 = a <|> b
+      where a = "foo" <$ put "branch A" <* empty
+            b = get <* put "branch B"
+
+aFunc :: IO ()
+aFunc = do
+  let run p          = runState (runParserT p "" "") "initial"
+      (Right a0, s0) = run parser0
+      (Right a1, s1) = run parser1
+
+  putStrLn  "Parser 0"
+  putStrLn ("Result:      " ++ show a0)
+  putStrLn ("Final state: " ++ show s0)
+
+  putStrLn  "Parser 1"
+  putStrLn ("Result:      " ++ show a1)
+  putStrLn ("Final state: " ++ show s1)
+
+-- >>> aFunc
+
+type ParState0 = StateT String (ParsecT Void Text Identity)
+
+parser3 :: ParState0 String
+parser3 = a <|> b
+  where
+    a = "foo" <$ put "branch A" <* empty
+    b = get   <* put "branch B"
+
+aFunc2 :: IO ()
+aFunc2 = do
+  let p            = runStateT parser3 "initial"
+      Right (a, s) = runParser p "" ""
+  putStrLn ("Result:      " ++ show a)
+  putStrLn ("Final state: " ++ show s)
+
+-- >>> aFunc2
+
+sc :: Parser ()
+sc = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
+
+lexeme :: Parser a -> Parser a
+lexeme = L.lexeme sc
+
+symbol :: Text -> Parser Text
+symbol = L.symbol sc
+
+charLiteral :: Parser Char
+charLiteral = between (char '\'') (char '\'') L.charLiteral
+
+stringLiteral :: Parser String
+stringLiteral = char '\"' *> manyTill L.charLiteral (char '\'')
+
+-- manyTill :: Alternative m => m a -> m end -> m [a]
+-- manyTill p end = go
+--   where
+--     go = ([] <$ end) <|> ((:) <$> p <*> go)
+
+integer :: Parser Integer
+integer = lexeme L.decimal
