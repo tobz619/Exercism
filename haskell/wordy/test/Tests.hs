@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import Data.Foldable     (for_)
 import Test.Hspec        (Spec, describe, it, shouldBe)
@@ -78,7 +79,7 @@ cases = [ Case { description = "just a number"
                }
         , Case { description = "addition and multiplication"
                , input       = "What is -3 plus 7 multiplied by -2?"
-               , expected    = Just (-8)
+               , expected    = Just (-17)
                }
         , Case { description = "multiple division"
                , input       = "What is -12 divided by 2 divided by -3?"

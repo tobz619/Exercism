@@ -6,18 +6,19 @@ dependencies:
 
 library:
   exposed-modules: WordProblem
-  haskell.ghcMod.executablePath: "stack"
   source-dirs: src
+  ghc-options: -Wall
   default-extensions: OverloadedStrings
   dependencies:
-  - megaparsec
-  - text
-  # - bar       # want to use in your solution.
+  - text       # List here the packages you
+  - parser-combinators
+  - megaparsec       # want to use in your solution.
 
 tests:
   test:
     main: Tests.hs
     source-dirs: test
+    default-extensions: OverloadedStrings
     dependencies:
       - wordy
       - hspec

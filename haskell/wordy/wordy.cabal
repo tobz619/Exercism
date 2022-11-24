@@ -10,20 +10,19 @@ build-type:     Simple
 
 library
   exposed-modules:
-      WordProblem ,
-      RunParser
+      WordProblem
   other-modules:
       Paths_wordy
   hs-source-dirs:
       src
   default-extensions:
       OverloadedStrings
+  ghc-options: -Wall
   build-depends:
       base
     , megaparsec
+    , parser-combinators
     , text
-    , implicit-hie
-    , mtl
   default-language: Haskell2010
 
 test-suite test
@@ -33,6 +32,8 @@ test-suite test
       Paths_wordy
   hs-source-dirs:
       test
+  default-extensions:
+      OverloadedStrings
   build-depends:
       base
     , hspec

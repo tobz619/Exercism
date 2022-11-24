@@ -7,6 +7,7 @@ import Control.Monad.Identity
 import qualified Control.Applicative
 import Text.Megaparsec hiding (State)
 import Text.Megaparsec.Char
+import Control.Monad.Combinators.Expr
 import qualified Text.Megaparsec.Char.Lexer as L
 import Data.Void
 import Data.Text (Text)
@@ -14,9 +15,6 @@ import qualified Data.Text as T
 
 
 type Parser = Parsec Void Text
-
-integerParser :: Parser Integer
-integerParser = undefined
 
 something = parseTest (satisfy (== 'a') :: Parser Char) ""
 
@@ -198,5 +196,47 @@ stringLiteral = char '\"' *> manyTill L.charLiteral (char '\'')
 --   where
 --     go = ([] <$ end) <|> ((:) <$> p <*> go)
 
-integer :: Parser Integer
+integer :: Parser Int
 integer = lexeme L.decimal
+
+data Expr =  Var String | Int Int | Negation Expr
+           | Sum Expr Expr | Subtr Expr Expr | Product Expr Expr
+           | Div Expr Expr deriving (Eq, Ord, Show)
+
+pVariable :: Parser Expr
+pVariable = Var <$> lexeme ((:) <$> letterChar <*> many alphaNumChar <?> "variable")
+
+pInt :: Parser Expr
+pInt = Int <$> integer
+
+parens :: Parser a -> Parser a
+parens = between (symbol "(") (symbol ")")
+
+pTerm :: Parser Expr
+pTerm = parens pExpr <|> pVariable <|> pInt
+
+pExpr :: Parser Expr
+pExpr = makeExprParser pTerm opsTable
+
+opsTable :: [[Operator Parser Expr]]
+opsTable = [ [prefix "-" Negation , prefix "+" id]
+           , [binary "*" Product  , binary "/" Div]
+           , [binary "+" Sum      , binary "-" Subtr] ]
+
+binary :: Text -> (Expr -> Expr -> Expr) -> Operator Parser Expr
+binary name f = InfixL  (f <$ symbol name)
+
+prefix, postfix :: Text -> (Expr -> Expr) -> Operator Parser Expr
+prefix  name f = Prefix  (f <$ symbol name)
+postfix name f = Postfix (f <$ symbol name)
+
+exprToInt :: Expr -> Maybe Integer
+exprToInt (Int i) = pure (toInteger i)
+exprToInt (Sum v1 v2) = (+) <$> exprToInt v1 <*> exprToInt v2
+exprToInt (Product v1 v2) = (*) <$> exprToInt v1 <*> exprToInt v2
+exprToInt (Div v1 v2)
+ | exprToInt v2 == Just 0 = Nothing
+ | otherwise = div <$> exprToInt v1 <*> exprToInt v2
+exprToInt (Negation v1) = negate <$> exprToInt v1
+exprToInt (Subtr v1 v2) = subtract <$> exprToInt v1 <*> exprToInt v2
+exprToInt _ = Nothing

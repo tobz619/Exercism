@@ -20,16 +20,6 @@
   (major1) == 4 && (major2) <  15 || \
   (major1) == 4 && (major2) == 15 && (minor) <= 1)
 #endif /* MIN_VERSION_base */
-/* package implicit-hie-0.1.3.0 */
-#ifndef VERSION_implicit_hie
-#define VERSION_implicit_hie "0.1.3.0"
-#endif /* VERSION_implicit_hie */
-#ifndef MIN_VERSION_implicit_hie
-#define MIN_VERSION_implicit_hie(major1,major2,minor) (\
-  (major1) <  0 || \
-  (major1) == 0 && (major2) <  1 || \
-  (major1) == 0 && (major2) == 1 && (minor) <= 3)
-#endif /* MIN_VERSION_implicit_hie */
 /* package megaparsec-9.2.2 */
 #ifndef VERSION_megaparsec
 #define VERSION_megaparsec "9.2.2"
@@ -40,16 +30,16 @@
   (major1) == 9 && (major2) <  2 || \
   (major1) == 9 && (major2) == 2 && (minor) <= 2)
 #endif /* MIN_VERSION_megaparsec */
-/* package mtl-2.2.2 */
-#ifndef VERSION_mtl
-#define VERSION_mtl "2.2.2"
-#endif /* VERSION_mtl */
-#ifndef MIN_VERSION_mtl
-#define MIN_VERSION_mtl(major1,major2,minor) (\
-  (major1) <  2 || \
-  (major1) == 2 && (major2) <  2 || \
-  (major1) == 2 && (major2) == 2 && (minor) <= 2)
-#endif /* MIN_VERSION_mtl */
+/* package parser-combinators-1.3.0 */
+#ifndef VERSION_parser_combinators
+#define VERSION_parser_combinators "1.3.0"
+#endif /* VERSION_parser_combinators */
+#ifndef MIN_VERSION_parser_combinators
+#define MIN_VERSION_parser_combinators(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  3 || \
+  (major1) == 1 && (major2) == 3 && (minor) <= 0)
+#endif /* MIN_VERSION_parser_combinators */
 /* package text-1.2.5.0 */
 #ifndef VERSION_text
 #define VERSION_text "1.2.5.0"
