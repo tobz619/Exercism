@@ -2,16 +2,12 @@
 
 module WordProblem where
 
-import Control.Monad
+
 import Text.Megaparsec hiding (State)
-import qualified Control.Applicative
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 import Control.Monad.Combinators.Expr
-
 import Data.Void ( Void )
-import Data.Text (Text)
-import qualified Data.Text as T
 
 type Parser = Parsec Void String
 
@@ -58,7 +54,7 @@ opsTable = [ [prefix "-" Negation , prefix "+" id]
            , [binary "plus" "+" Sum      , binary "minus" "-" Subtr] ]
 
 binary :: String -> String -> (Expr -> Expr -> Expr) -> Operator Parser Expr
-binary name sym f = InfixL (f <$ try (symbol sym <|> lexeme (string' name)))
+binary words sym f = InfixL (f <$ try (symbol sym <|> lexeme (string' words)))
 
 prefix, postfix :: String -> (Expr -> Expr) -> Operator Parser Expr
 prefix  name f = Prefix  (f <$ symbol name)
