@@ -10,9 +10,9 @@ library:
   ghc-options: -Wall
   default-extensions: OverloadedStrings
   dependencies:
-  - text       # List here the packages you
+  - text     
   - parser-combinators
-  - megaparsec       # want to use in your solution.
+  - megaparsec      
 
 tests:
   test:

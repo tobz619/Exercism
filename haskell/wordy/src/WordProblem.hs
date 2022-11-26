@@ -46,7 +46,7 @@ pTerm :: Parser Expr
 pTerm = parens pExpr <|> pVariable <|> pInt <?> "number"
 
 pExpr :: Parser Expr
-pExpr = makeExprParser pTerm opsTable
+pExpr = makeExprParser pTerm opsTable <* notFollowedBy letterChar
 
 opsTable :: [[Operator Parser Expr]]
 opsTable = [ [prefix "-" Negation , prefix "+" id]
