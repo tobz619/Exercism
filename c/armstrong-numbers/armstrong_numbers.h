@@ -4,5 +4,6 @@
 #include <stdbool.h>
 
 bool is_armstrong_number(int candidate);
+int raisepower(int num, int raise);
 
 #endif
