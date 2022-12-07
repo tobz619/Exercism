@@ -15,7 +15,6 @@ saddlePoints matrix = foldr findSaddles [] (assocs matrix)
 getRow :: Int -> Array (Int, Int) Int -> [((Int, Int), Int)]
 getRow i arr = filter (\(coord,_) -> fst coord == i) (assocs arr)
 
-
 getCol :: Int -> Array (Int, Int) Int -> [((Int, Int), Int)]
 getCol i arr = filter (\(coord,_) -> snd coord == i) (assocs arr)
 
