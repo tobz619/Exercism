@@ -31,7 +31,7 @@ version = Version [1,2,0,7] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\bin"
-libdir     = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\lib\\x86_64-windows-ghc-9.0.2\\bowling-1.2.0.7-6CYfIM5yBN0Jb522fsHQzZ"
+libdir     = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\lib\\x86_64-windows-ghc-9.0.2\\bowling-1.2.0.7-DzBb7RgmygiIyNLBVzbAVL"
 dynlibdir  = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\lib\\x86_64-windows-ghc-9.0.2"
 datadir    = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\share\\x86_64-windows-ghc-9.0.2\\bowling-1.2.0.7"
 libexecdir = "C:\\Users\\to4\\Documents\\Exercism\\haskell\\bowling\\.stack-work\\install\\1797caad\\libexec\\x86_64-windows-ghc-9.0.2\\bowling-1.2.0.7"

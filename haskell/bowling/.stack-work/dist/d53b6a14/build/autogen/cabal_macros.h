@@ -103,10 +103,10 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_PACKAGE_KEY
-#define CURRENT_PACKAGE_KEY "bowling-1.2.0.7-6CYfIM5yBN0Jb522fsHQzZ"
+#define CURRENT_PACKAGE_KEY "bowling-1.2.0.7-DzBb7RgmygiIyNLBVzbAVL"
 #endif /* CURRENT_packageKey */
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-6CYfIM5yBN0Jb522fsHQzZ"
+#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-DzBb7RgmygiIyNLBVzbAVL"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "1.2.0.7"

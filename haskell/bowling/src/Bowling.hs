@@ -28,3 +28,16 @@ scorer [] _ = Nothing
 
 openScore :: [Int] -> [Either BowlingError Int]
 openScore xs = unfoldr (\(ys, c) -> (scorer ys c)) (xs,1)
+
+g x = x+3
+
+fun :: (Int, Int) -> Either String (Int, Int)
+fun (x, c)
+ | x > 10 = Left $ mconcat ["Failed at ", show c,". Val = ", show x]
+ | otherwise = Right (g x, c+1)
+
+one = fun (3, 0)
+
+two = fun (3, 0) >>= fun >>= fun
+
+three = fun (3,0) >>= fun >>= fun >>= fun
