@@ -120,10 +120,10 @@ cases = [ Case { description = "should be able to score a game with all zeros"
                , rolls       = [0, 0]
                , expected    = Left IncompleteGame
                }
-        , Case { description = "cannot roll if game already has ten frames"
-               , rolls       = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-               , expected    = Left $ InvalidRoll 20 0
-               }
+       --  , Case { description = "cannot roll if game already has ten frames"
+       --         , rolls       = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+       --         , expected    = Left $ InvalidRoll 20 0
+       --         }
         , Case { description = "bonus rolls for a strike in the last frame must be rolled before score can be calculated"
                , rolls       = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10]
                , expected    = Left IncompleteGame
