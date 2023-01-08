@@ -1,8 +1,6 @@
 module Bowling (score, BowlingError(..)) where
 
 import Data.List
-import Control.Monad.State
-
 
 data BowlingError = IncompleteGame
                   | InvalidRoll { rollIndex :: Int, rollValue :: Int }
@@ -10,13 +8,9 @@ data BowlingError = IncompleteGame
 
 data Score = X | Spare | Score Int | Blank
 
-type GameState = State [Int] GameCounter
-
 data GameCounter = GameCounter {bc :: BC,
                                 fc :: FC,
                                 sc :: Either BowlingError Int} deriving (Show, Eq)
-
-data Elig a = Good a | Bad a deriving (Show,Eq)
 
 type FC = Int
 
@@ -40,7 +34,6 @@ updateScore :: Either BowlingError Int -> GameCounter -> GameCounter
 updateScore (Left x) g = case sc g of
                           Left _ -> g
                           _ -> g {sc = Left x}
-
 updateScore (Right res) g = g {sc = fmap (+ res) (sc g)}
 
 
@@ -94,24 +87,18 @@ sLast _ [] = Nothing
 
 
 
+stateGame :: [Int] -> GameCounter -> (GameCounter, [Int])
 stateGame xs init = let res = mkF init xs
                      in case res of Just (counter, rem) -> stateGame rem counter
                                     Nothing -> (init, xs)
 
+finalScore :: [Int] -> GameCounter -> Either BowlingError Int
 finalScore xs init = if fc (fst (stateGame xs init)) < 10 && isRight (sc (fst (stateGame xs init)))
                       then Left IncompleteGame
                       else sc . fst $ stateGame xs init
                         where isRight (Right x) = True
                               isRight _ = False
 
-
-
--- genScore :: [Int] -> Either BowlingError Int
--- genScore xs = fmap sum . sequence . fmap sc $ unfoldr (\ys -> mkFrames (zero, ys)) xs
-
-
--- debugRolls :: [Int] -> [GameCounter]
--- debugRolls = unfoldr (\ys -> mkFrames (zero,ys))
 
 eligRoll :: Int -> Maybe Int
 eligRoll 10 = Just 10
