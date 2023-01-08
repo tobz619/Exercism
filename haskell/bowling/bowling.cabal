@@ -15,9 +15,10 @@ library
       Paths_bowling
   hs-source-dirs:
       src
-  ghc-options: -Wall
+  ghc-options: -Wunused-matches
   build-depends:
       base
+    , mtl
   default-language: Haskell2010
 
 test-suite test

@@ -20,6 +20,16 @@
   (major1) == 4 && (major2) <  15 || \
   (major1) == 4 && (major2) == 15 && (minor) <= 1)
 #endif /* MIN_VERSION_base */
+/* package mtl-2.2.2 */
+#ifndef VERSION_mtl
+#define VERSION_mtl "2.2.2"
+#endif /* VERSION_mtl */
+#ifndef MIN_VERSION_mtl
+#define MIN_VERSION_mtl(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  2 || \
+  (major1) == 2 && (major2) == 2 && (minor) <= 2)
+#endif /* MIN_VERSION_mtl */
 
 /* tool gcc-10.2.0 */
 #ifndef TOOL_VERSION_gcc
@@ -103,10 +113,10 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_PACKAGE_KEY
-#define CURRENT_PACKAGE_KEY "bowling-1.2.0.7-6CYfIM5yBN0Jb522fsHQzZ"
+#define CURRENT_PACKAGE_KEY "bowling-1.2.0.7-F44lFgkCeepKFpRCJkazlj"
 #endif /* CURRENT_packageKey */
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-6CYfIM5yBN0Jb522fsHQzZ"
+#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-F44lFgkCeepKFpRCJkazlj"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "1.2.0.7"

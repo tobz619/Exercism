@@ -123,7 +123,7 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-AnEikzOzwoh3N9wyDJ3OfZ-test"
+#define CURRENT_COMPONENT_ID "bowling-1.2.0.7-9gqLs5QnLPDHxfkuHGf6Cu-test"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "1.2.0.7"
