@@ -40,7 +40,7 @@ findMins = foldr isMin []
                 | x == y = (a,x):(b,y):acc
                 | otherwise =(b,y):acc
 
-
+---------------------
 saddlePoints' :: Array (Int, Int) Int -> [(Int, Int)]
 saddlePoints' arr =
   [ (i, j) | i <- [1 .. m] , j <- [1 .. n] 
