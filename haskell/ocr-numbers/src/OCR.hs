@@ -4,7 +4,10 @@ import Data.List
 import Data.Char (intToDigit)
 
 convert :: String -> String
-convert xs = error "You need to implement this function."
+convert xs = intercalate "," $ map unocr allLines
+            where allLines = splitEvery 4 (lines xs)
+                  splitEvery _ []  = []
+                  splitEvery n xs  = take n xs : splitEvery n (drop n xs)
 
 makeOCR :: Char -> [String]
 makeOCR '0' = [" _ ",
@@ -12,7 +15,10 @@ makeOCR '0' = [" _ ",
                "|_|",
                "   "]
 
-makeOCR '1' = ["   ","  |","  |","   "]
+makeOCR '1' = ["   ",
+               "  |",
+               "  |",
+               "   "]
 
 makeOCR '2' = [" _ "
               ," _|"
@@ -46,17 +52,29 @@ makeOCR '9' = lines " _ \n\
                     \   "
 
 
-makeOCR ',' = lines "\n\n\n"
+ocrMaker :: [Char] -> [[[String]]]
+ocrMaker xs = go [] xs
+             where go acc (',':xs) = reverse acc : go [] xs
+                   go acc (x:xs)   = go (makeOCR x: acc) xs
+                   go acc []       = [reverse acc]
 
-ocrMaker = map makeOCR
+
+ocrRow :: [[[String]]] -> [[String]]
+ocrRow [] = []
+ocrRow (x:xs) = foldr1 (zipWith (++)) x : ocrRow xs
 
 
+ocr :: String -> String
+ocr =  concat . map unlines . ocrRow . ocrMaker
 
-ocrRow xs = foldr1 (zipWith (++)) xs
+unocr = map ocrToText . unocrLine
 
+unocrLine xs | all null xs = []
+             | otherwise = map (take 3) xs : (unocrLine . map (drop 3)) xs
+        
 
 ocrToText :: [String] -> Char
-ocrToText xs = maybe '?'  intToDigit (elemIndex xs (map makeOCR "01234567890,"))
+ocrToText xs = maybe '?'  intToDigit (elemIndex xs (map makeOCR "01234567890"))
 
 
--- printOcrs = mapM_ putStrLn . ocr
+printOcrs = putStr . ocr
