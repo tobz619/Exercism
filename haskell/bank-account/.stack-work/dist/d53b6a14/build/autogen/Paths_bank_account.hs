@@ -31,7 +31,7 @@ version = Version [0,1,0,4] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\bin"
-libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\lib\\x86_64-windows-ghc-9.0.2\\bank-account-0.1.0.4-4TnTAy5KpnhBOwCMhkOzTe"
+libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\lib\\x86_64-windows-ghc-9.0.2\\bank-account-0.1.0.4-GQO5BA9x0rwEqYjmdMApXn"
 dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\lib\\x86_64-windows-ghc-9.0.2"
 datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\share\\x86_64-windows-ghc-9.0.2\\bank-account-0.1.0.4"
 libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\bank-account\\.stack-work\\install\\b18ebbf0\\libexec\\x86_64-windows-ghc-9.0.2\\bank-account-0.1.0.4"
