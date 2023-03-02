@@ -9,9 +9,11 @@ dependencies:
 library:
   exposed-modules: Frequency
   source-dirs: src
-  ghc-options: -Wall
-  # dependencies:
-  # - foo       # List here the packages you
+  default-extensions: OverloadedStrings
+  ghc-options: -Wall 
+  dependencies:
+  - parallel
+  - mtl       # List here the packages you
   # - bar       # want to use in your solution.
 
 tests:
