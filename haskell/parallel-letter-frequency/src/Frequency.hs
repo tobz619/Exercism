@@ -9,21 +9,23 @@ import Data.Char (isAlpha, toLower)
 import Control.Concurrent
 import Control.Parallel
 import Control.Parallel.Strategies
+import Data.Foldable (Foldable(foldl'))
 
 frequency :: Int -> [T.Text] -> Map.Map Char Int
-frequency nWorkers texts = foldl (Map.unionWith (+)) Map.empty (runEval . parMap letterFreq2 $ map format texts)
+frequency nWorkers texts = foldl' (Map.unionWith (+)) Map.empty (runEval . parMap' letterFreq2 nWorkers $ map format texts)
 
-                            where parMap _ [] = return []
-                                  parMap f (x:xs) = do
+                            where parMap' _ _ [] = return []
+                                  parMap' f 0 xs = parMap' f nWorkers xs
+                                  parMap' !f w (x:xs) = do
                                     a <- rpar $ f x
-                                    as <- parMap f xs
+                                    as <- parMap' f (w-1) xs
                                     return (a:as)
                                   
-                                  format =  filter isAlpha . map toLower .T.unpack
+                                  format =  filter isAlpha . map toLower . T.unpack
 
 
 letterFreq2 :: String -> Map.Map Char Int
-letterFreq2 = foldl mapMaker Map.empty
+letterFreq2 = foldl' mapMaker Map.empty
          where mapMaker acc x = case Map.lookup x acc of
                                  Just _ -> Map.alter (fmap (+1)) x acc
                                  Nothing -> Map.insert x 1 acc

@@ -35,6 +35,6 @@ benchGroup processors numWorkers numAnthems =
 main :: IO ()
 main = do threads <- getNumCapabilities
           let numsOfWorkers = nub $ sort [1..threads]
-              numsOfAnthems = [500]
+              numsOfAnthems = [10000]
 
           defaultMain $ benchGroup threads numsOfWorkers <$> numsOfAnthems
