@@ -1,0 +1,18 @@
+Test suite test: RUNNING...
+
+rotate
+  rotate a by 0, same output as input [v]
+  rotate a by 1 [v]
+  rotate a by 26, same output as input [v]
+  rotate m by 13 [v]
+  rotate n by 13 with wrap around alphabet [v]
+  rotate capital letters [v]
+  rotate spaces [v]
+  rotate numbers [v]
+  rotate punctuation [v]
+  rotate all letters [v]
+
+Finished in 0.0008 seconds
+10 examples, 0 failures
+Test suite test: PASS
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\rotational-cipher\dist-newstyle\build\x86_64-windows\ghc-9.2.5\rotational-cipher-1.2.0.4\t\test\test\rotational-cipher-1.2.0.4-test.log
