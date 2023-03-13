@@ -1,0 +1,14 @@
+/home/tobzdaman619/.ghcup/ghc/9.0.2/lib/ghc-9.0.2/include/ghcversion.h:
+  hash: b6281754d6dc5c5462a97f01fbffb615a7d9f031384e8e8250fce23e8f43f266
+? /home/tobzdaman619/Exercism/haskell/pythagorean-triplet/.stack-work/dist/aarch64-linux/Cabal-3.4.1.0/build/test/autogen/Paths_pythagorean_triplet.hs
+: hash: 28a726221da8a036a4619beeff6016ff355c190f1dc7b8a4926f908252bc5458
+? /home/tobzdaman619/Exercism/haskell/pythagorean-triplet/.stack-work/dist/aarch64-linux/Cabal-3.4.1.0/build/test/autogen/cabal_macros.h
+: hash: 791cdbb7d6666f4d065a32fa4e4cf66875ae63111e8c61f52587da28c8998f5d
+/home/tobzdaman619/Exercism/haskell/pythagorean-triplet/package.yaml:
+  hash: e75a57d17b4e5f12109d050a2c48b6aac361d981185030902fe0ba8f948a184b
+/home/tobzdaman619/Exercism/haskell/pythagorean-triplet/pythagorean-triplet.cabal:
+  hash: 4edd74f77c7caab5937fad6f3e6302203595668981ea801cd916374e513ef3bc
+/home/tobzdaman619/Exercism/haskell/pythagorean-triplet/test/Tests.hs:
+  hash: 735c6be1af6f3b1e5f3f671e94f5d18e5acff066d03651f6094314a126cc341e
+/usr/include/stdc-predef.h:
+  hash: 64fdf694f7b3d51ec6c45c06dcb71ebbe9455742d3ea673012016668853d3bff
