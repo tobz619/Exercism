@@ -7,10 +7,9 @@ type Domino = (Int,Int)
 
 chain :: [Domino] -> Maybe [Domino]
 chain [] = Just []
-chain ds = k (mkChains ds)
-         where k [] = Nothing
-               k xs = Just (head xs)
-
+chain ds = k . filter sameFirstLast . filter (\x -> length x == length ds) . mkChain $ ds
+            where k [] = Nothing
+                  k (x:_) = Just x
 
 sameFirstLast :: [Domino] -> Bool
 sameFirstLast [] = False
@@ -26,18 +25,19 @@ validNexts d@(l,r) domList = [ k valid | valid <- domList, let (l',r') = valid,
 
 appendToChain :: Domino -> [Domino] -> [Domino]
 appendToChain d [] = [d]
-appendToChain d@(l,r) ds@((l',_):xs) | l == l' = swap d:ds
+appendToChain d@(l,r) ds@((l',_):_)  | l == l' = swap d:ds
                                      | r == l' = d:ds
-                                     | otherwise = []
+                                     | otherwise = ds
 
 
-mkChain :: [Domino] -> [Domino] -> Domino -> [Domino]
-mkChain [] acc d    = appendToChain d acc
-mkChain cands acc d = do (next, nexts) <- validNexts d (delete d cands)
-                         mkChain nexts (appendToChain d acc) next
 
-mkChains :: [Domino] -> [[Domino]]
-mkChains ds = filter (\x -> length x == length ds && sameFirstLast x) . map (mkChain ds []) $ ds
+mkChain ds = go [] ds
+         where go acc [] = pure acc
+               go acc ds = do d <- ds
+                              (res, rest) <- validNexts d ds
+                              go (appendToChain res acc) rest
+
+
 
 {- 1. Take every domino and run it with validNexts to get all valid neighbours.
    2. If it validNexts returns Nothing, leave that domino in the potential chain list;
