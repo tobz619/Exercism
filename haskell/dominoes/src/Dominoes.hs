@@ -2,46 +2,33 @@ module Dominoes (chain) where
 
 import Data.Tuple
 import Data.List
+import Data.Maybe
 
 type Domino = (Int,Int)
 
 chain :: [Domino] -> Maybe [Domino]
 chain [] = Just []
-chain ds = k . filter sameFirstLast . filter (\x -> length x == length ds) . mkChain $ ds
-            where k [] = Nothing
-                  k (x:_) = Just x
+chain ds = k . filter sameFirstLast . solver $ ds
+         where k [] = Nothing
+               k (x:_) = Just x
 
 sameFirstLast :: [Domino] -> Bool
 sameFirstLast [] = False
 sameFirstLast xs = (fst . head) xs == (snd . last) xs
 
-validNexts :: Domino -> [Domino] -> [(Domino, [Domino])]
-validNexts d@(l,r) domList = [ k valid | valid <- domList, let (l',r') = valid,
-                                        l' == l || l' == r ||
-                                        r' == l || r' == r]
-                        
-                              where k d = (d, delete d domList)
+
+appendToChain :: Domino -> [Domino] -> Maybe (Domino,[Domino])
+appendToChain d [] = Just (d,[d])
+appendToChain d@(l,r) ds@((l',_):_)  | l == l' = Just (d , swap d:ds)
+                                     | r == l' = Just (d, d:ds)
+                                     | otherwise = Nothing
 
 
-appendToChain :: Domino -> [Domino] -> [Domino]
-appendToChain d [] = [d]
-appendToChain d@(l,r) ds@((l',_):_)  | l == l' = swap d:ds
-                                     | r == l' = d:ds
-                                     | otherwise = ds
+eligibleChainBuilder :: [Domino] -> [Domino] -> [(Domino, [Domino])]
+eligibleChainBuilder acc = mapMaybe (`appendToChain` acc)
 
-
-
-mkChain ds = go [] ds
-         where go acc [] = pure acc
-               go acc ds = do d <- ds
-                              (res, rest) <- validNexts d ds
-                              go (appendToChain res acc) rest
-
-
-
-{- 1. Take every domino and run it with validNexts to get all valid neighbours.
-   2. If it validNexts returns Nothing, leave that domino in the potential chain list;
-      if Just xs then remove the first occurrence of that domino from the list.
-   3. Run non-deterministically.
-   4. Ensure all 
--}
+solver :: [Domino] -> [[Domino]]
+solver = go [] 
+      where go acc [] = pure acc
+            go acc ds = do (added, newAcc) <- eligibleChainBuilder acc ds
+                           go newAcc (delete added ds)
