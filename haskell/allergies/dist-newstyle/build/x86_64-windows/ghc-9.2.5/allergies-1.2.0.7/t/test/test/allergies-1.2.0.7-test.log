@@ -1,0 +1,22 @@
+Test suite test: RUNNING...
+
+isAllergicTo
+  no allergies means not allergic [v]
+  is allergic to eggs [v]
+  allergic to eggs in addition to other stuff [x]
+
+Failures:
+
+  test\Tests.hs:45:47: 
+  1) isAllergicTo allergic to eggs in addition to other stuff
+       expected: False
+        but got: True
+
+  To rerun use: --match "/isAllergicTo/allergic to eggs in addition to other stuff/"
+
+Randomized with seed 1130425775
+
+Finished in 0.0014 seconds
+3 examples, 1 failure
+Test suite test: FAIL
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\allergies\dist-newstyle\build\x86_64-windows\ghc-9.2.5\allergies-1.2.0.7\t\test\test\allergies-1.2.0.7-test.log
