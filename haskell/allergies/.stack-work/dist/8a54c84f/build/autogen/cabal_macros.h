@@ -31,25 +31,25 @@
   (major1) == 10 && (major2) <  2 || \
   (major1) == 10 && (major2) == 2 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_gcc */
-/* tool ghc-9.2.5 */
+/* tool ghc-9.2.7 */
 #ifndef TOOL_VERSION_ghc
-#define TOOL_VERSION_ghc "9.2.5"
+#define TOOL_VERSION_ghc "9.2.7"
 #endif /* TOOL_VERSION_ghc */
 #ifndef MIN_TOOL_VERSION_ghc
 #define MIN_TOOL_VERSION_ghc(major1,major2,minor) (\
   (major1) <  9 || \
   (major1) == 9 && (major2) <  2 || \
-  (major1) == 9 && (major2) == 2 && (minor) <= 5)
+  (major1) == 9 && (major2) == 2 && (minor) <= 7)
 #endif /* MIN_TOOL_VERSION_ghc */
-/* tool ghc-pkg-9.2.5 */
+/* tool ghc-pkg-9.2.7 */
 #ifndef TOOL_VERSION_ghc_pkg
-#define TOOL_VERSION_ghc_pkg "9.2.5"
+#define TOOL_VERSION_ghc_pkg "9.2.7"
 #endif /* TOOL_VERSION_ghc_pkg */
 #ifndef MIN_TOOL_VERSION_ghc_pkg
 #define MIN_TOOL_VERSION_ghc_pkg(major1,major2,minor) (\
   (major1) <  9 || \
   (major1) == 9 && (major2) <  2 || \
-  (major1) == 9 && (major2) == 2 && (minor) <= 5)
+  (major1) == 9 && (major2) == 2 && (minor) <= 7)
 #endif /* MIN_TOOL_VERSION_ghc_pkg */
 /* tool haddock-2.26.0 */
 #ifndef TOOL_VERSION_haddock
@@ -81,15 +81,15 @@
   (major1) == 0 && (major2) <  68 || \
   (major1) == 0 && (major2) == 68 && (minor) <= 8)
 #endif /* MIN_TOOL_VERSION_hsc2hs */
-/* tool runghc-9.2.5 */
+/* tool runghc-9.2.7 */
 #ifndef TOOL_VERSION_runghc
-#define TOOL_VERSION_runghc "9.2.5"
+#define TOOL_VERSION_runghc "9.2.7"
 #endif /* TOOL_VERSION_runghc */
 #ifndef MIN_TOOL_VERSION_runghc
 #define MIN_TOOL_VERSION_runghc(major1,major2,minor) (\
   (major1) <  9 || \
   (major1) == 9 && (major2) <  2 || \
-  (major1) == 9 && (major2) == 2 && (minor) <= 5)
+  (major1) == 9 && (major2) == 2 && (minor) <= 7)
 #endif /* MIN_TOOL_VERSION_runghc */
 /* tool strip-2.28 */
 #ifndef TOOL_VERSION_strip

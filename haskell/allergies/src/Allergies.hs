@@ -1,6 +1,7 @@
 module Allergies (Allergen(..), allergies, isAllergicTo) where
 
 import Data.Maybe
+import Data.List
 
 data Allergen = Eggs
               | Peanuts
@@ -14,15 +15,22 @@ data Allergen = Eggs
 
 allergies :: Int -> [Allergen]
 allergies 0 = []
-allergies score = getAllergy score [Cats, Pollen .. Eggs]
-                    where getAllergy _ [] = []
-                          getAllergy s (x:xs) | isAllergicTo x s = x : allergies (score `rem` fromJust (lookup x getAllergenScorePairs) )
-                                              | otherwise = getAllergy s xs
+allergies score = reverse $ subtLargest score -- tests only passed with reverse order? Not ideal!
+
 
 isAllergicTo :: Allergen -> Int -> Bool
 isAllergicTo _ 0 = False
-isAllergicTo allergen score = fmap (`rem` score) (lookup allergen getAllergenScorePairs) >= Just 0
+isAllergicTo allergen score = allergen `elem` allergies score
+
+subtLargest :: Int -> [Allergen]
+subtLargest = unfoldr (`scoreBuilder` [Cats, Pollen .. Eggs]) 
+
+scoreBuilder :: Int -> [Allergen] -> Maybe (Allergen, Int)
+scoreBuilder 0 _ = Nothing
+scoreBuilder _ [] = Nothing
+scoreBuilder score (x:xs) | lookup x mkAllergenScorePairs <= Just score = Just (x, score - fromJust (lookup x mkAllergenScorePairs))
+                          | otherwise = scoreBuilder score xs
 
 
-getAllergenScorePairs :: [(Allergen, Int)]
-getAllergenScorePairs = zip [Eggs .. Cats] (1 : map (2^) [1..])
+mkAllergenScorePairs :: [(Allergen, Int)]
+mkAllergenScorePairs = zip [Eggs .. Cats] (1 : map (2^) [1..])

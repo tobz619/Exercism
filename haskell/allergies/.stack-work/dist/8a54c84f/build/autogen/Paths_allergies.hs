@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\bin"
-libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\lib\\x86_64-windows-ghc-9.2.5\\allergies-1.2.0.7-Bziq5oyVWGU1mC3zkULctc"
-dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\lib\\x86_64-windows-ghc-9.2.5"
-datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\share\\x86_64-windows-ghc-9.2.5\\allergies-1.2.0.7"
-libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\libexec\\x86_64-windows-ghc-9.2.5\\allergies-1.2.0.7"
-sysconfdir = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\9fc3ba5e\\etc"
+bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\bin"
+libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\lib\\x86_64-windows-ghc-9.2.7\\allergies-1.2.0.7-Bziq5oyVWGU1mC3zkULctc"
+dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\lib\\x86_64-windows-ghc-9.2.7"
+datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\share\\x86_64-windows-ghc-9.2.7\\allergies-1.2.0.7"
+libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\libexec\\x86_64-windows-ghc-9.2.7\\allergies-1.2.0.7"
+sysconfdir = "C:\\Users\\Tobi\\Exercism\\haskell\\allergies\\.stack-work\\install\\7eb224f8\\etc"
 
 getBinDir     = catchIO (getEnv "allergies_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "allergies_libdir")     (\_ -> return libdir)
