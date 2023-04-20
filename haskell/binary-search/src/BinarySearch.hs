@@ -1,7 +1,6 @@
 module BinarySearch (find) where
 
 import Data.Array
-<<<<<<< HEAD
 import Data.Array.Base (safeIndex)
 
 find :: Ord a => Array Int a -> a -> Maybe Int
@@ -34,8 +33,3 @@ split a = (left, right)
 saferIndex _ [] = Nothing
 saferIndex 0 (b:_) = Just b
 saferIndex a (_:bs) = saferIndex (a-1) bs 
-=======
-
-find :: Ord a => Array Int a -> a -> Maybe Int
-find array x = error "You need to implement this function."
->>>>>>> e84524456529c3b098a2a285dfa7d76620e771c3
