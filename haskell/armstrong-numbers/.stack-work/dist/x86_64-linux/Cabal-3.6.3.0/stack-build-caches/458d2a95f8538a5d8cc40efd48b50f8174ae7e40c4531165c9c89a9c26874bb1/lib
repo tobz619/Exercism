@@ -1,0 +1,14 @@
+/home/tobzdaman619/.ghcup/ghc/9.2.7/lib/ghc-9.2.7/include/ghcversion.h:
+  hash: d590b76d2d5f98f01894882dc106d920a101f52edb6a09b9a7f8dc701b075565
+? /home/tobzdaman619/Exercism/haskell/armstrong-numbers/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/autogen/Paths_armstrong_numbers.hs
+: hash: 2f22605c4853078a5e111bbbfc44eaac49ac60f9e9bc978fd781fe980e3220f5
+/home/tobzdaman619/Exercism/haskell/armstrong-numbers/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/autogen/cabal_macros.h:
+  hash: 0e859bf7450f7ef0969ed348d2e79aff4f87872d8aa662a42876f9f0e0289eb2
+/home/tobzdaman619/Exercism/haskell/armstrong-numbers/armstrong-numbers.cabal:
+  hash: d68aa2caa45b1e24c20b112e2b2b9cf5adc08549520fb44a960912e02d35fa11
+/home/tobzdaman619/Exercism/haskell/armstrong-numbers/package.yaml:
+  hash: ed817912cfe932d83c44b08695df3ab4f4ed905b319580190223cd42b0e6671b
+/home/tobzdaman619/Exercism/haskell/armstrong-numbers/src/ArmstrongNumbers.hs:
+  hash: 89a389a2f487ff77f212724cafc9d9db8dabe3b619c9e6f6522b7d1fcfd9a889
+/usr/include/stdc-predef.h:
+  hash: 64fdf694f7b3d51ec6c45c06dcb71ebbe9455742d3ea673012016668853d3bff
