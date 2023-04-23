@@ -64,7 +64,7 @@ highHands xs = findHigh handtests xs
                   handtests = [isRoyalFlush, isStraightFlush, isFourOfAKind, isFullHouse, isFlush, isStraight, isFiveHighStraight, isThreeOfAKind, isTwoPair, isPair]
 
 grouper :: [Card] -> [Card]
-grouper xs | or (($ xs) <$> grouptests) = concat . sortBy (\a b -> compare (length b) (length a)) . groupBy (\x y -> fst y == fst x) . sortBy (\a b -> compare (fst b) (fst a)) $ xs
+grouper xs | or (grouptests <*> pure xs) = concat . sortBy (\a b -> compare (length b) (length a)) . groupBy (\x y -> fst y == fst x) . sortBy (\a b -> compare (fst b) (fst a)) $ xs
            | otherwise = sortBy (\a b -> compare (fst b) (fst a)) xs
                where grouptests = [isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair]
 
