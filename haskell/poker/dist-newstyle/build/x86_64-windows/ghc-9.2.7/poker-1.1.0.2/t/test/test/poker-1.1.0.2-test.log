@@ -31,7 +31,7 @@ bestHands
   both hands have straight flush, tie goes to highest-ranked card [v]
   no winner if a hand is invalid [v]
 
-Finished in 0.0036 seconds
+Finished in 0.0025 seconds
 29 examples, 0 failures
 Test suite test: PASS
 Test suite logged to: C:\Users\Tobi\Exercism\haskell\poker\dist-newstyle\build\x86_64-windows\ghc-9.2.7\poker-1.1.0.2\t\test\test\poker-1.1.0.2-test.log

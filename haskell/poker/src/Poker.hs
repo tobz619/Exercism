@@ -58,9 +58,9 @@ fromSuit x = fromMaybe "" (lookup x pairTable)
 
 highHands :: [[Card]] -> [[Card]]
 highHands xs = findHigh handtests xs
-            where findHigh [] xs = xs
-                  findHigh (t:ts) xs | any t (grouper <$> xs) = filter t xs
-                                     | otherwise = findHigh ts xs
+            where findHigh [] cs = cs
+                  findHigh (t:ts) cs | any t xs = filter t cs
+                                     | otherwise = findHigh ts cs
                   handtests = [isRoyalFlush, isStraightFlush, isFourOfAKind, isFullHouse, isFlush, isStraight, isFiveHighStraight, isThreeOfAKind, isTwoPair, isPair]
 
 grouper :: [Card] -> [Card]
@@ -77,8 +77,8 @@ getHighHands xs = highHands <$> (traverse toCards xs >>= checkLen)
 maxHighCards :: [Card] -> [Card] -> [Card]
 maxHighCards l r = checker (grouper l) (grouper r)
                   where checker [] [] = l
-                        checker l [] = l
-                        checker [] r = r
+                        checker lef [] = lef
+                        checker [] rig = rig
                         checker ((lv,_):ls) ((rv,_):rs) | lv > rv = l
                                                         | rv > lv = r
                                                         | otherwise = checker ls rs
@@ -87,8 +87,8 @@ maxHighCards l r = checker (grouper l) (grouper r)
 compareHands :: [String] -> Maybe [[Card]]
 compareHands xs = k $ getHighHands xs
             where k Nothing = Nothing
-                  k (Just list@(c1:cs)) = let maxC = foldr1 maxHighCards list
-                                           in Just $ filter (\v -> map fst maxC == map fst v) list
+                  k (Just list) = let maxC = foldr1 maxHighCards list
+                                   in Just $ filter (\v -> map fst maxC == map fst v) list
 
 runUp, runDown :: Value -> Value
 runUp Ace   = Two 
@@ -105,7 +105,6 @@ isRoyalFlush :: [Card] -> Bool
 isRoyalFlush cards@(x:_) = cards == [ (v, anchorSuit) |
                                       let anchorSuit = snd x,
                                       let suits = map snd cards,
-                                      let values = map fst cards,
                                       v <- [Ace, King, Queen, Jack, Ten]
                                     ]
 
@@ -137,7 +136,6 @@ isFiveHighStraight cards = map fst (grouper cards) == Ace : [Five, Four .. Two ]
 
 getPair :: Card -> [Card] -> Bool
 getPair _ [] = False
-getPair _ [x] = False
 getPair (v,_) cards = length (filter (== v) (map fst cards)) == 2
 
 isTwoPair :: [Card] -> Bool
