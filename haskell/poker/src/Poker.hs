@@ -1,18 +1,18 @@
 module Poker (bestHands) where
 
-import Data.Char
-import Control.Applicative
+import Data.Char ( isDigit )
+import Control.Applicative ( Applicative(liftA2) )
+import Data.Maybe ( fromMaybe )
+import Data.List ( groupBy, sortBy )
 
 data Suit = Spades | Hearts | Diamonds | Clubs deriving (Show, Eq, Enum)
 
-data Value = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Eq, Ord, Enum, Bounded)
-
-data Hand = RoyalFlush | StraightFlush | FourOfAKind | FullHouse | Flush | Straight | ThreeOfAKind | TwoPair | OnePair | HighCard deriving (Show, Eq, Ord, Enum)
+data Value = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace deriving (Show, Eq, Ord, Enum, Bounded)
 
 type Card = (Value, Suit)
 
 bestHands :: [String] -> Maybe [String]
-bestHands xs = compareHands xs >>= \x -> pure (fmap cardsToString x)
+bestHands xs = compareHands xs >>= \wins -> pure (fmap cardsToString wins)
 
 
 tovalue :: String -> Maybe Value
@@ -42,40 +42,6 @@ toCard xs = liftA2 (,) (tovalue num) (toSuit suit)
 toCards :: String -> Maybe [Card]
 toCards = traverse toCard . words
 
-getHighHands :: [String] -> Maybe [[Card]]
-getHighHands xs = highHands <$> (mapM toCards xs >>= checkLen)
-                      where checkLen ret | all (\x -> length x == 5) ret = pure ret
-                                         | otherwise = Nothing
-
-highHands :: [[Card]] -> [[Card]]
-highHands xs = findHigh handtests xs
-            where findHigh [] xs = xs
-                  findHigh (t:ts) xs | (not . any t) xs = findHigh ts xs
-                                     | otherwise = filter t xs
-
-                  handtests = [isRoyalFlush, isStraightFlush, isFourOfAKind, isFullHouse, isFlush, isStraight, isThreeOfAKind, isTwoPair, isPair, isHighCard]
-
-sortHand :: [Card] -> [Card]
-sortHand [] = []
-sortHand [x] = [x]
-sortHand (first@(val,_):rest) = smaller ++ pure first ++ bigger
-                          where smaller = sortHand $ filter (\(v,_) -> v < val) rest
-                                bigger  = sortHand $ filter (\(v,_) -> v > val) rest
-
-maxHighCards :: [Card] -> [Card] -> [Card]
-maxHighCards l r = checker (sortHand l) (sortHand r)
-                  where checker ((lv,_):ls) ((rv,_):rs) | lv > rv = l
-                                                        | rv > lv = r
-                                                        | otherwise = checker ls rs
-                        checker [] [] = l
-
-compareHands :: [String] -> Maybe [[Card]]
-compareHands xs = k $ getHighHands xs
-            where k Nothing = Nothing
-                  k (Just [xs]) = Just [xs]
-                  k (Just list@(c1:cs)) = let max = map fst $ foldr maxHighCards c1 cs
-                                           in Just $ filter (\x -> map fst x == max) list
-
 cardsToString :: [Card] -> String
 cardsToString = init . concatMap ((++ " ") . fromCard)
 
@@ -83,23 +49,57 @@ fromCard :: Card -> String
 fromCard (v, s) = fromValue v ++ fromSuit s
 
 fromValue :: Value -> String
-fromValue x = maybe "" id (lookup x pairTable)
-                where pairTable = zip [Ace .. King] ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+fromValue x = fromMaybe "" (lookup x pairTable)
+                where pairTable = zip [Two .. Ace] ["2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 
 fromSuit :: Suit -> String
-fromSuit x = maybe "" id (lookup x pairTable)
+fromSuit x = fromMaybe "" (lookup x pairTable)
                 where pairTable = zip [Spades .. ] ["S","H","D","C"]
 
-runUp, runDown :: Value -> Value
-runUp v   | v == maxBound = maxBound
-          | otherwise = succ v
+highHands :: [[Card]] -> [[Card]]
+highHands xs = findHigh handtests xs
+            where findHigh [] xs = xs
+                  findHigh (t:ts) xs | any t (grouper <$> xs) = filter t xs
+                                     | otherwise = findHigh ts xs
+                  handtests = [isRoyalFlush, isStraightFlush, isFourOfAKind, isFullHouse, isFlush, isStraight, isFiveHighStraight, isThreeOfAKind, isTwoPair, isPair]
 
-runDown v | v == minBound = minBound
-          | otherwise = pred v
+grouper :: [Card] -> [Card]
+grouper xs | or (($ xs) <$> grouptests) = concat . sortBy (\a b -> compare (length b) (length a)) . groupBy (\x y -> fst y == fst x) . sortBy (\a b -> compare (fst b) (fst a)) $ xs
+           | otherwise = sortBy (\a b -> compare (fst b) (fst a)) xs
+               where grouptests = [isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair]
+
+getHighHands :: [String] -> Maybe [[Card]]
+getHighHands xs = highHands <$> (traverse toCards xs >>= checkLen)
+                      where checkLen ret | all (\x -> length x == 5) ret = pure ret
+                                         | otherwise = Nothing
+
+
+maxHighCards :: [Card] -> [Card] -> [Card]
+maxHighCards l r = checker (grouper l) (grouper r)
+                  where checker [] [] = l
+                        checker l [] = l
+                        checker [] r = r
+                        checker ((lv,_):ls) ((rv,_):rs) | lv > rv = l
+                                                        | rv > lv = r
+                                                        | otherwise = checker ls rs
+
+
+compareHands :: [String] -> Maybe [[Card]]
+compareHands xs = k $ getHighHands xs
+            where k Nothing = Nothing
+                  k (Just list@(c1:cs)) = let maxC = foldr1 maxHighCards list
+                                           in Just $ filter (\v -> map fst maxC == map fst v) list
+
+runUp, runDown :: Value -> Value
+runUp Ace   = Two 
+runUp v     = succ v
+
+runDown Two = Ace
+runDown v   = pred v
 
 hasNeighbour :: Value -> [Card] -> Bool
-hasNeighbour value vs = (`elem` map fst vs) (runUp value)
-                      || (`elem` map fst vs) (runDown value)
+hasNeighbour value vs = (\x -> x `elem` map fst vs && x /= value) (runUp value)
+                      || (\x -> x `elem` map fst vs && x /= value) (runDown value)
 
 isRoyalFlush :: [Card] -> Bool
 isRoyalFlush cards@(x:_) = cards == [ (v, anchorSuit) |
@@ -112,7 +112,6 @@ isRoyalFlush cards@(x:_) = cards == [ (v, anchorSuit) |
 isStraightFlush :: [Card] -> Bool
 isStraightFlush cards@(x:_) = cards == [(v, anchorSuit) |
                                           let anchorSuit = snd x,
-                                          let ,
                                           v <- map fst cards,
                                           hasNeighbour v cards]
 
@@ -131,7 +130,10 @@ isFlush :: [Card] -> Bool
 isFlush cards@(x:_) = cards == [(v, anchorSuit) | let anchorSuit = snd x, v <- map fst cards]
 
 isStraight :: [Card] -> Bool
-isStraight cards = cards == [neighbours | neighbours <- cards, hasNeighbour (fst neighbours) cards]
+isStraight cards = cards == [neighbours | neighbours <- cards, hasNeighbour (fst neighbours) cards] && (not . isFiveHighStraight) cards
+
+isFiveHighStraight :: [Card] -> Bool
+isFiveHighStraight cards = map fst (grouper cards) == Ace : [Five, Four .. Two ]
 
 getPair :: Card -> [Card] -> Bool
 getPair _ [] = False
@@ -146,20 +148,3 @@ isPair xs = length (filter (`getPair` xs) xs) == 2
 
 isFullHouse :: [Card] -> Bool
 isFullHouse xs = isThreeOfAKind xs && isPair xs
-
-isHighCard :: [Card] -> Bool
-isHighCard = const True
-
-exampleFullHouse = fives ++ kings
-                where fives = [(Five, s) | s <- [Spades, Clubs, Hearts] ]
-                      kings = [(King, s) | s <- [Spades, Clubs]]
-
-someHand = [ "3H 6H 7H 8H 5H"
-                                , "4S 5H 4C 5D 4H"]
-
-singleHand = ["4S 5S 7H 8D JC"]
-
-multiWin = [ "4D 5S 6S 8D 3C"
-                               , "2S 4C 7S 9H 10H"
-                               , "3S 4S 5D 6H JH"
-                               , "3H 4H 5C 6C JD"]
