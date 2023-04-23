@@ -1,0 +1,27 @@
+Test suite test: RUNNING...
+
+bestHands
+  single hand always wins [v]
+  highest card out of all hands win [v]
+  a tie has multiple winners [v]
+  multiple hands with the same high cards, tie compares next highest ranked, down to last card [v]
+  one pair beats high card [v]
+  highest pair wins [v]
+  two pairs beats one pair [v]
+  both hands have two pairs, highest ranked pair wins [x]
+
+Failures:
+
+  test\Tests.hs:19:48: 
+  1) bestHands both hands have two pairs, highest ranked pair wins
+       expected: Just ["2S 8H 2D 8D 3H"]
+        but got: Just ["4S 5H 4C 8S 5D"]
+
+  To rerun use: --match "/bestHands/both hands have two pairs, highest ranked pair wins/"
+
+Randomized with seed 110423211
+
+Finished in 0.0020 seconds
+8 examples, 1 failure
+Test suite test: FAIL
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\poker\dist-newstyle\build\x86_64-windows\ghc-9.2.7\poker-1.1.0.2\t\test\test\poker-1.1.0.2-test.log

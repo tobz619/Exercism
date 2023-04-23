@@ -1,54 +1,94 @@
 module Poker (bestHands) where
 
 import Data.Char
-import Data.Functor
 import Control.Applicative
 
 data Suit = Spades | Hearts | Diamonds | Clubs deriving (Show, Eq, Enum)
 
 data Value = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Show, Eq, Ord, Enum, Bounded)
 
+data Hand = RoyalFlush | StraightFlush | FourOfAKind | FullHouse | Flush | Straight | ThreeOfAKind | TwoPair | OnePair | HighCard deriving (Show, Eq, Ord, Enum)
+
 type Card = (Value, Suit)
 
-data Hand = RoyalFlush | StraightFlush | FourOfAKind | FullHouse | Flush | Straight | ThreeOfAKind | TwoPair | OnePair | HighCard deriving (Show, Eq, Ord)
-
 bestHands :: [String] -> Maybe [String]
-bestHands = error "You need to implement this function!"
+bestHands xs = compareHands xs >>= \x -> pure (fmap cardsToString x)
 
 
-fromValue :: String -> Maybe Value
-fromValue ""   = Nothing
-fromValue "A" = Just Ace
-fromValue "J"  = Just Jack
-fromValue "Q"  = Just Queen
-fromValue "K"  = Just King
-fromValue xs = let value = read xs :: Int
-                   k i | i > 10 = Nothing
-                       | i < 0 = Nothing
-                       | otherwise = lookup value valueTable
-                            where valueTable = zip [2 .. 10] [Two .. Ten]
+tovalue :: String -> Maybe Value
+tovalue ""   = Nothing
+tovalue "A" = Just Ace
+tovalue "J"  = Just Jack
+tovalue "Q"  = Just Queen
+tovalue "K"  = Just King
+tovalue xs = let value = read xs :: Int
+                 k i | i > 10 = Nothing
+                     | i < 0 = Nothing
+                     | otherwise = lookup value valueTable
+                         where valueTable = zip [2 .. 10] [Two .. Ten]
                 in k value
 
-fromSuit :: String -> Maybe Suit
-fromSuit "S" = Just Spades
-fromSuit "H" = Just Hearts
-fromSuit "D" = Just Diamonds
-fromSuit "C" = Just Clubs
-fromSuit _ = Nothing
+toSuit :: String -> Maybe Suit
+toSuit "S" = Just Spades
+toSuit "H" = Just Hearts
+toSuit "D" = Just Diamonds
+toSuit "C" = Just Clubs
+toSuit _ = Nothing
 
 toCard :: String -> Maybe Card
-toCard xs = liftA2 (,) (fromValue num) (fromSuit suit)
+toCard xs = liftA2 (,) (tovalue num) (toSuit suit)
             where (num, suit) = span (\x -> (`elem` "AJQK") x || isDigit x) xs
 
 toCards :: String -> Maybe [Card]
 toCards = traverse toCard . words
 
-scoreHand :: [Card] -> Maybe Hand
-scoreHand cards = checkHands cards $> handTest cards
-                where checkHands cs | length cs /= 5 = Nothing
-                                    | otherwise = Just cards
-scoreHandSt :: String -> Maybe Hand
-scoreHandSt xs = toCards xs >>= scoreHand
+getHighHands :: [String] -> Maybe [[Card]]
+getHighHands xs = highHands <$> (mapM toCards xs >>= checkLen)
+                      where checkLen ret | all (\x -> length x == 5) ret = pure ret
+                                         | otherwise = Nothing
+
+highHands :: [[Card]] -> [[Card]]
+highHands xs = findHigh handtests xs
+            where findHigh [] xs = xs
+                  findHigh (t:ts) xs | (not . any t) xs = findHigh ts xs
+                                     | otherwise = filter t xs
+
+                  handtests = [isRoyalFlush, isStraightFlush, isFourOfAKind, isFullHouse, isFlush, isStraight, isThreeOfAKind, isTwoPair, isPair, isHighCard]
+
+sortHand :: [Card] -> [Card]
+sortHand [] = []
+sortHand [x] = [x]
+sortHand (first@(val,_):rest) = smaller ++ pure first ++ bigger
+                          where smaller = sortHand $ filter (\(v,_) -> v < val) rest
+                                bigger  = sortHand $ filter (\(v,_) -> v > val) rest
+
+maxHighCards :: [Card] -> [Card] -> [Card]
+maxHighCards l r = checker (sortHand l) (sortHand r)
+                  where checker ((lv,_):ls) ((rv,_):rs) | lv > rv = l
+                                                        | rv > lv = r
+                                                        | otherwise = checker ls rs
+                        checker [] [] = l
+
+compareHands :: [String] -> Maybe [[Card]]
+compareHands xs = k $ getHighHands xs
+            where k Nothing = Nothing
+                  k (Just [xs]) = Just [xs]
+                  k (Just list@(c1:cs)) = let max = map fst $ foldr maxHighCards c1 cs
+                                           in Just $ filter (\x -> map fst x == max) list
+
+cardsToString :: [Card] -> String
+cardsToString = init . concatMap ((++ " ") . fromCard)
+
+fromCard :: Card -> String
+fromCard (v, s) = fromValue v ++ fromSuit s
+
+fromValue :: Value -> String
+fromValue x = maybe "" id (lookup x pairTable)
+                where pairTable = zip [Ace .. King] ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+
+fromSuit :: Suit -> String
+fromSuit x = maybe "" id (lookup x pairTable)
+                where pairTable = zip [Spades .. ] ["S","H","D","C"]
 
 runUp, runDown :: Value -> Value
 runUp v   | v == maxBound = maxBound
@@ -107,23 +147,19 @@ isPair xs = length (filter (`getPair` xs) xs) == 2
 isFullHouse :: [Card] -> Bool
 isFullHouse xs = isThreeOfAKind xs && isPair xs
 
-handTest :: [Card] -> Hand
-handTest cards | isRoyalFlush cards = RoyalFlush
-               | isStraightFlush cards = StraightFlush
-               | isFourOfAKind cards = FourOfAKind
-               | isFullHouse cards = FullHouse
-               | isFlush cards = Flush
-               | isStraight cards = Straight
-               | isThreeOfAKind cards = ThreeOfAKind
-               | isTwoPair cards = TwoPair
-               | isPair cards = OnePair
-               | otherwise = HighCard
+isHighCard :: [Card] -> Bool
+isHighCard = const True
 
 exampleFullHouse = fives ++ kings
                 where fives = [(Five, s) | s <- [Spades, Clubs, Hearts] ]
                       kings = [(King, s) | s <- [Spades, Clubs]]
 
-someHand = [ "4H 7H 8H 9H 6H"
-                               , "2S 4S 5S 6S 7S"]
+someHand = [ "3H 6H 7H 8H 5H"
+                                , "4S 5H 4C 5D 4H"]
 
-someExample = map scoreHandSt someHand
+singleHand = ["4S 5S 7H 8D JC"]
+
+multiWin = [ "4D 5S 6S 8D 3C"
+                               , "2S 4C 7S 9H 10H"
+                               , "3S 4S 5D 6H JH"
+                               , "3H 4H 5C 6C JD"]
