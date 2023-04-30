@@ -104,7 +104,6 @@ hasNeighbour value vs = (\x -> x `elem` map fst vs && x /= value) (runUp value)
 isRoyalFlush :: [Card] -> Bool
 isRoyalFlush cards@(x:_) = cards == [ (v, anchorSuit) |
                                       let anchorSuit = snd x,
-                                      let suits = map snd cards,
                                       v <- [Ace, King, Queen, Jack, Ten]
                                     ]
 
@@ -115,7 +114,8 @@ isStraightFlush cards@(x:_) = cards == [(v, anchorSuit) |
                                           hasNeighbour v cards]
 
 isXOfAKind :: Int -> [Card] -> Bool
-isXOfAKind i cards@(x:xs)  | length cards < i = False
+isXOfAKind _ [] = False
+isXOfAKind i cards@(x:xs)   | length cards < i = False
                             | length (filter (\(v,_) -> (== v) (fst x)) cards) == i = True
                             | otherwise = isXOfAKind i xs
 
