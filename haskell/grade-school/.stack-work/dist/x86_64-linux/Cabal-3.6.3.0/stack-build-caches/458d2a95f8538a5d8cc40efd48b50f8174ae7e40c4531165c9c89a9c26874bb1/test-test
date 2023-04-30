@@ -1,0 +1,14 @@
+/home/tobzdaman619/.ghcup/ghc/9.2.7/lib/ghc-9.2.7/include/ghcversion.h:
+  hash: d590b76d2d5f98f01894882dc106d920a101f52edb6a09b9a7f8dc701b075565
+? /home/tobzdaman619/Exercism/haskell/grade-school/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/test/autogen/Paths_grade_school.hs
+: hash: d24fb15f5193fd8e9acd15f84cd8e05367366ee89697e0c92bd9493575e660da
+/home/tobzdaman619/Exercism/haskell/grade-school/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/test/autogen/cabal_macros.h:
+  hash: 711f675bfd23512cab5b3d248b411e2d2dfc7619a86a87145b0e91f6fb13d0db
+/home/tobzdaman619/Exercism/haskell/grade-school/grade-school.cabal:
+  hash: a353a7fca46ce98639f71f789ec64d37df5eb00b6f7f23812aaf1094f47e6f35
+/home/tobzdaman619/Exercism/haskell/grade-school/package.yaml:
+  hash: ec73fde6330e19556b9151c75edf4021b7be6ed2f633a219f03a2870a5e34aaa
+/home/tobzdaman619/Exercism/haskell/grade-school/test/Tests.hs:
+  hash: d6393287fdf88842ea35d20267c9f4a8bf96f89a2cc070db7ba6ccde1d69d60b
+/usr/include/stdc-predef.h:
+  hash: 64fdf694f7b3d51ec6c45c06dcb71ebbe9455742d3ea673012016668853d3bff
