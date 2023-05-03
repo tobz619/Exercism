@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/bin"
-libdir     = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4-BSpTTrAhWXg8cpDCn6z1d3-test"
-dynlibdir  = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7"
-datadir    = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/share/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4"
-libexecdir = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/libexec/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4"
-sysconfdir = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/etc"
+bindir     = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/bin"
+libdir     = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/lib/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4-BSpTTrAhWXg8cpDCn6z1d3-test"
+dynlibdir  = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/lib/x86_64-linux-ghc-9.2.7"
+datadir    = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/share/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4"
+libexecdir = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/libexec/x86_64-linux-ghc-9.2.7/robot-name-0.1.0.4"
+sysconfdir = "/home/tobzdaman619/Exercism/haskell/robot-name/.stack-work/install/x86_64-linux/7579d3deb0f08a55cf6808c930775f7cb0dc1d0d5b8c32983c8cea97c5d75845/9.2.7/etc"
 
 getBinDir     = catchIO (getEnv "robot_name_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "robot_name_libdir")     (\_ -> return libdir)
