@@ -1,0 +1,14 @@
+Test suite test: RUNNING...
+
+name should match expected pattern [v]
+name is persistent [v]
+different robots have different names [v]
+new name should match expected pattern [v]
+new name is persistent [v]
+new name is different from old name [v]
+resetting a robot affects only one robot [v]
+
+Finished in 0.1529 seconds
+7 examples, 0 failures
+Test suite test: PASS
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\robot-name\dist-newstyle\build\x86_64-windows\ghc-9.2.7\robot-name-0.1.0.4\t\test\test\robot-name-0.1.0.4-test.log
