@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\bin"
-libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\lib\\x86_64-windows-ghc-9.2.5\\parallel-letter-frequency-0.1.0.4-7Fq7odk9SLxKS54y7N5m3n"
-dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\lib\\x86_64-windows-ghc-9.2.5"
-datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\share\\x86_64-windows-ghc-9.2.5\\parallel-letter-frequency-0.1.0.4"
-libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\libexec\\x86_64-windows-ghc-9.2.5\\parallel-letter-frequency-0.1.0.4"
-sysconfdir = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\9fc3ba5e\\etc"
+bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\bin"
+libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\lib\\x86_64-windows-ghc-9.2.7\\parallel-letter-frequency-0.1.0.4-7Fq7odk9SLxKS54y7N5m3n"
+dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\lib\\x86_64-windows-ghc-9.2.7"
+datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\share\\x86_64-windows-ghc-9.2.7\\parallel-letter-frequency-0.1.0.4"
+libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\libexec\\x86_64-windows-ghc-9.2.7\\parallel-letter-frequency-0.1.0.4"
+sysconfdir = "C:\\Users\\Tobi\\Exercism\\haskell\\parallel-letter-frequency\\.stack-work\\install\\a82fe5b9\\etc"
 
 getBinDir     = catchIO (getEnv "parallel_letter_frequency_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "parallel_letter_frequency_libdir")     (\_ -> return libdir)

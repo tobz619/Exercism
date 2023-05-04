@@ -1,38 +1,41 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE TupleSections #-}
 
 module Frequency (frequency) where
 
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Data.Char (isAlpha, toLower)
-import Control.Concurrent
 import Control.Parallel
 import Control.Parallel.Strategies
+import Data.Foldable (Foldable(foldl'))
 
 frequency :: Int -> [T.Text] -> Map.Map Char Int
-frequency nWorkers texts = foldl (Map.unionWith (+)) Map.empty (runEval . parMap' letterFreq2 nWorkers $ map format texts)
+frequency nWorkers texts = foldP nWorkers (Map.unionWith (+)) (map (letterFreq2.format) texts)
 
-                            where parMap' _ _ [] = return []
-                                  parMap' f 0 xs = parMap' f nWorkers xs
-                                  parMap' f w (x:xs) = do
-                                    a <- rpar $ f x
-                                    as <- parMap' f (w-1) xs
-                                    return (a:as)
-                                  
-                                  format =  filter isAlpha . map toLower . T.unpack
+              where format = filter isAlpha . map toLower . T.unpack
 
+                    foldP :: (NFData k, NFData a, Ord k, Num a) => Int -> (Map.Map k a -> Map.Map k a -> Map.Map k a) -> [Map.Map k a] -> Map.Map k a
+                    foldP _    _  [] = Map.empty
 
+                    foldP 0 f (x:xs) = runEval $ do 
+                                                y <- rpar x
+                                                rpar $ f y (foldP nWorkers f xs)
+                                                 
+                    
+                    foldP cores f (x:xs) = runEval $ do
+                                                y <- rparWith rdeepseq x
+                                                ys <- rpar $ foldP (cores - 1) f xs
+                                                rpar $ y `f` ys
+
+-- | Counts the number of occurences of the first letter 
+--   and returns a new string omitting that letter
+--   and a map containing a count of that letter
 letterFreq2 :: String -> Map.Map Char Int
-letterFreq2 = foldl mapMaker Map.empty
-         where mapMaker acc x = case Map.lookup x acc of
-                                 Just _ -> Map.alter (fmap (+1)) x acc
-                                 Nothing -> Map.alter (const $ Just 1) x acc
+letterFreq2 = Map.fromListWith (+) . map (, 1)
 
 
--- -- | Counts the number of occurences of the first letter 
--- --   and returns a new string omitting that letter
--- --   and a map containing a count of that letter
+
 -- --
 -- -- >>> runState (letterFreq "Apple") Map.empty
 -- -- ("pple",fromList [('A',1)])
