@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 
 module Frequency (frequency) where
@@ -6,9 +5,7 @@ module Frequency (frequency) where
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import Data.Char (isAlpha, toLower)
-import Control.Parallel
 import Control.Parallel.Strategies
-import Data.Foldable (Foldable(foldl'))
 
 frequency :: Int -> [T.Text] -> Map.Map Char Int
 frequency nWorkers texts = foldP nWorkers (Map.unionWith (+)) (map (letterFreq2.format) texts)
