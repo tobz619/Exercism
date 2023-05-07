@@ -4,12 +4,12 @@
 
 import Data.Foldable     (for_)
 import Test.Hspec        (Spec, describe, it, shouldBe)
-import Test.Hspec.Runner (configFastFail, defaultConfig, hspecWith)
+import Test.Hspec.Runner (configFailFast, defaultConfig, hspecWith)
 
 import WordProblem (answer)
 
 main :: IO ()
-main = hspecWith defaultConfig {configFastFail = True} specs
+main = hspecWith defaultConfig {configFailFast = True} specs
 
 specs :: Spec
 specs = describe "answer" $ for_ cases test
@@ -79,7 +79,7 @@ cases = [ Case { description = "just a number"
                }
         , Case { description = "addition and multiplication"
                , input       = "What is -3 plus 7 multiplied by -2?"
-               , expected    = Just (-17)
+               , expected    = Just (-8)
                }
         , Case { description = "multiple division"
                , input       = "What is -12 divided by 2 divided by -3?"
