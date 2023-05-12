@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards   #-}
-
 module WordProblem where
 
 
@@ -21,7 +19,7 @@ whatIsParser :: Parser String
 whatIsParser = lexeme $ string' "What is "
 
 sc :: Parser ()
-sc = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
+sc = L.space space1 (L.skipLineComment "--") (L.skipBlockComment "{-}" "-}")
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
@@ -50,11 +48,12 @@ pExpr = makeExprParser pTerm opsTable <* notFollowedBy letterChar
 
 opsTable :: [[Operator Parser Expr]]
 opsTable = [ [prefix "-" Negation , prefix "+" id]
-           , [binary "multiplied by" "*" Product  , binary "divided by" "/" Div]
-           , [binary "plus" "+" Sum      , binary "minus" "-" Subtr] ]
+           , [binary "divided by" "/" Div]
+           , [binary "plus" "+" Sum      , binary "minus" "-" Subtr]
+           , [binary "multiplied by" "*" Product ] ]
 
 binary :: String -> String -> (Expr -> Expr -> Expr) -> Operator Parser Expr
-binary words sym f = InfixL (f <$ try (symbol sym <|> lexeme (string' words)))
+binary word sym f = InfixL (f <$ try (symbol sym <|> lexeme (string' word)))
 
 prefix, postfix :: String -> (Expr -> Expr) -> Operator Parser Expr
 prefix  name f = Prefix  (f <$ symbol name)

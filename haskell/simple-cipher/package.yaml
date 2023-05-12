@@ -8,8 +8,8 @@ library:
   exposed-modules: Cipher
   source-dirs: src
   ghc-options: -Wall
-  # dependencies:
-  # - foo       # List here the packages you
+  dependencies:
+   - random       # List here the packages you
   # - bar       # want to use in your solution.
 
 tests:
