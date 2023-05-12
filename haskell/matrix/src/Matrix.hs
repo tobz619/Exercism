@@ -15,9 +15,23 @@ module Matrix
 import qualified Data.Vector as V
 import Control.Monad
 import Data.Vector (Vector)
+import Text.Megaparsec
+import Text.Megaparsec.Char
 
+data Expr a = Append a (Expr a) | End |NewLine
+
+exprMatrix :: Expr a -> [[a]]
+exprMatrix (Append x b) = pure x : exprMatrix b
+exprMatrix End = [[]]
+exprMatrix NewLine = []
 
 newtype Matrix a = Matrix {getMatrix :: Vector (Vector a) } deriving (Eq, Show)
+
+listBuilder :: (Eq a, Num a) => [a] -> [[a]]
+listBuilder = go []
+            where go _ [] = []
+                  go acc (x:xs) | x == 3 = acc : go [] xs
+                                | otherwise = go (x : acc) xs
 
 cols :: Matrix a -> Int
 cols m = maybe 0 V.length (getMatrix m V.!? 0)
