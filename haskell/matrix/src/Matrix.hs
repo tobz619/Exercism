@@ -15,9 +15,42 @@ module Matrix
 import qualified Data.Vector as V
 import Control.Monad
 import Data.Vector (Vector)
-
+import Text.Megaparsec
+import Text.Megaparsec.Char
+import Data.Void (Void)
 
 newtype Matrix a = Matrix {getMatrix :: Vector (Vector a) } deriving (Eq, Show)
+
+type MParser a = Parsec Void String a
+
+data Expr a = Val a | Cons (Expr a) (Expr a) | End | ExprEof deriving Show
+
+getNum :: MParser Int
+getNum = read <$> (space *> many digitChar <* space)
+
+
+exprInt :: MParser (Expr Int)
+exprInt = do  Val <$> getNum
+
+end :: MParser (Expr a)
+end = do End <$ (space *> newline <*space)
+
+eofPars :: MParser (Expr a)
+eofPars = do ExprEof <$ (space *> eof <* space )
+
+
+
+exprBuilder :: Expr a -> [[a]]
+exprBuilder (Val a) = a
+exprBuilder (Cons a b) = exprBuilder a : se
+exprBuilder End = [] : se
+exprBuilder ExprEof = [[]]
+
+
+allParser :: MParser [[Int]]
+allParser = exprBuilder [] <$> (exprInt <|> end <|> eofPars)
+
+test = parse allParser  ""
 
 cols :: Matrix a -> Int
 cols m = maybe 0 V.length (getMatrix m V.!? 0)
