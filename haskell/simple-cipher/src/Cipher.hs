@@ -33,14 +33,18 @@ intShift a | isUpper a = ord a - ord 'A'
            | otherwise = ord a - ord 'a'
 
 
-{-| Shifts letters according to the int given modulo 26. If it exceeds the bounds then
-    subtract 26 to get the correct position -}
+{-| Shifts letters recursively while (i != 0) -}
 letterShift :: Int -> Char -> Char
-letterShift i c | isAlpha c = up shift
-                | isLower c = lw shift
-                | otherwise = c 
-                     where shift = ord c + (i `mod` 26)
-                           up l | not . isAlpha . chr $ l = up . (26 `subtract`) $ l 
-                                | otherwise = chr l
-                           lw l | not . isLower . chr $ l = lw . (26 `subtract`) $ l 
-                                | otherwise = chr l
+letterShift 0 c = c
+letterShift i c | i < 0 = letterShift (i+1) (shiftBackward c)
+                | otherwise = letterShift (i-1) (shiftForward c)
+
+shiftForward :: Char -> Char
+shiftForward 'z' = 'a'
+shiftForward 'Z' = 'A'
+shiftForward  x  = succ x
+
+shiftBackward :: Char -> Char
+shiftBackward 'a' = 'z'
+shiftBackward 'A' = 'Z'
+shiftBackward  x  = pred x
