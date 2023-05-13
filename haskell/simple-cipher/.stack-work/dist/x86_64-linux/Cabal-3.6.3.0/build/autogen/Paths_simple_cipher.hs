@@ -43,7 +43,7 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 bindir     = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/bin"
-libdir     = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/simple-cipher-1.2.0.5-DiITPGTjUCLvhlxZ7VuOJ"
+libdir     = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/simple-cipher-1.2.0.5-KZeYaprQ7X8CK2CxK1alAv"
 dynlibdir  = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7"
 datadir    = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/share/x86_64-linux-ghc-9.2.7/simple-cipher-1.2.0.5"
 libexecdir = "/home/tobzdaman619/Exercism/haskell/simple-cipher/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/libexec/x86_64-linux-ghc-9.2.7/simple-cipher-1.2.0.5"
