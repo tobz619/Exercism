@@ -123,10 +123,10 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_PACKAGE_KEY
-#define CURRENT_PACKAGE_KEY "simple-cipher-1.2.0.5-DiITPGTjUCLvhlxZ7VuOJ"
+#define CURRENT_PACKAGE_KEY "simple-cipher-1.2.0.5-KZeYaprQ7X8CK2CxK1alAv"
 #endif /* CURRENT_packageKey */
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "simple-cipher-1.2.0.5-DiITPGTjUCLvhlxZ7VuOJ"
+#define CURRENT_COMPONENT_ID "simple-cipher-1.2.0.5-KZeYaprQ7X8CK2CxK1alAv"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "1.2.0.5"

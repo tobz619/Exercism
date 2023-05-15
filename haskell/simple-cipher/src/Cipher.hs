@@ -17,7 +17,7 @@ caesarEncode key = zipWith encodeLetter (cycle key)
 caesarEncodeRandom :: String -> IO (String, String)
 caesarEncodeRandom text = do rlen <- randomRIO (1,length text)
                              k <- replicateM rlen (randomRIO ('a','z'))
-                             return (k, caesarEncode k text)
+                             pure (k, caesarEncode k text)
 
 {-| Shifts the letter in v by k using positive letterShift -}
 encodeLetter :: Char -> Char -> Char
