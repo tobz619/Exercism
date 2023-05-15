@@ -19,7 +19,7 @@ caesarEncodeRandom text = do rlen <- randomRIO (1,length text)
                              k <- replicateM rlen (randomRIO ('a','z'))
                              return (k, caesarEncode k text)
 
-{-| Shifts the letter in the v by k: makes some checks via up and j to make sure the shift is within bounds -}
+{-| Shifts the letter in v by k using positive letterShift -}
 encodeLetter :: Char -> Char -> Char
 encodeLetter k = letterShift (intShift k)
 
@@ -27,7 +27,7 @@ encodeLetter k = letterShift (intShift k)
 decodeLetter :: Char -> Char -> Char
 decodeLetter k = letterShift (negate . intShift $ k)                     
 
-{-| Calculates how a letter is shifted relative to A -}
+{-| Calculates how much a letter is shifted relative to A -}
 intShift :: Char -> Int
 intShift a | isUpper a = ord a - ord 'A'
            | otherwise = ord a - ord 'a'
@@ -36,8 +36,8 @@ intShift a | isUpper a = ord a - ord 'A'
 {-| Shifts letters recursively while (i != 0) -}
 letterShift :: Int -> Char -> Char
 letterShift 0 c = c
-letterShift i c | i < 0 = letterShift (i+1) (shiftBackward c)
-                | otherwise = letterShift (i-1) (shiftForward c)
+letterShift i c | i < 0 = letterShift (i `mod` 26 + 1) (shiftBackward c)
+                | otherwise = letterShift (i `mod` 26 - 1) (shiftForward c)
 
 shiftForward :: Char -> Char
 shiftForward 'z' = 'a'
