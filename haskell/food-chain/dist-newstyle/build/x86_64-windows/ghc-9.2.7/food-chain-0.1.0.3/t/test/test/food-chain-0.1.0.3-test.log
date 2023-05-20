@@ -1,0 +1,10 @@
+Test suite test: RUNNING...
+
+song
+  matches lines [v]
+  matches full song [v]
+
+Finished in 0.0009 seconds
+2 examples, 0 failures
+Test suite test: PASS
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\food-chain\dist-newstyle\build\x86_64-windows\ghc-9.2.7\food-chain-0.1.0.3\t\test\test\food-chain-0.1.0.3-test.log
