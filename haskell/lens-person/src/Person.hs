@@ -46,7 +46,7 @@ setCurrentStreet = set (address . street)
 
 setBirthMonth :: Int -> Person -> Person
 setBirthMonth month person = set (born . bornOn) (editDay month) person
-                  where editDay m = let (y',_,d') = toGregorian $ view (born . bornOn) person
+                  where editDay m = let (y',_,d') = toGregorian . view (born . bornOn) $ person
                                      in fromGregorian y' m d'
 
 renameStreets :: (String -> String) -> Person -> Person
