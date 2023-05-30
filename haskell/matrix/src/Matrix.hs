@@ -23,7 +23,7 @@ newtype Matrix a = Matrix {getMatrix :: Vector (Vector a) } deriving (Eq, Show)
 
 type MParser a = Parsec Void String a
 
-data Expr a = Val a | Cons (Expr a) (Expr a) | End | ExprEof deriving Show
+data Expr a = Val  a | Cons (Expr a) (Expr a) | End | ExprEof deriving Show
 
 getNum :: MParser Int
 getNum = read <$> (space *> many digitChar <* space)
@@ -40,11 +40,9 @@ eofPars = do ExprEof <$ (space *> eof <* space )
 
 
 
-exprBuilder :: Expr a -> [[a]]
-exprBuilder (Val a) = a
-exprBuilder (Cons a b) = exprBuilder a : se
-exprBuilder End = [] : se
-exprBuilder ExprEof = [[]]
+exprBuilder acc (Val a) = a:acc
+exprBuilder acc (Cons a b) =  exprBuilder (eval a : acc) b
+
 
 
 allParser :: MParser [[Int]]
