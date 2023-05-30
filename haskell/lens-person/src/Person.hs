@@ -42,12 +42,12 @@ bornStreet :: Born -> String
 bornStreet = view (bornAt . street) 
 
 setCurrentStreet :: String -> Person -> Person
-setCurrentStreet newStreet = over (address . street) (const newStreet)
+setCurrentStreet = set (address . street)
 
 setBirthMonth :: Int -> Person -> Person
-setBirthMonth month = over (born . bornOn) (const (editDay month))
-                  where editDay m d = let (y',_,d') = toGregorian d
-                                       in fromGregorian y' m d'
+setBirthMonth month person = set (born . bornOn) (editDay month) person
+                  where editDay m = let (y',_,d') = toGregorian $ view (born . bornOn) person
+                                     in fromGregorian y' m d'
 
 renameStreets :: (String -> String) -> Person -> Person
-renameStreets f person = error "You need to implement this function."
+renameStreets f = over (address . street) f . over (born . bornAt . street) f

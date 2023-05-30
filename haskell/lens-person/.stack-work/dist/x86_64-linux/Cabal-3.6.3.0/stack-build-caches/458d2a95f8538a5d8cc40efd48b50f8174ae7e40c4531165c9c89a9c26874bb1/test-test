@@ -1,0 +1,14 @@
+/home/tobzdaman619/.ghcup/ghc/9.2.7/lib/ghc-9.2.7/include/ghcversion.h:
+  hash: d590b76d2d5f98f01894882dc106d920a101f52edb6a09b9a7f8dc701b075565
+? /home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/test/autogen/Paths_lens_person.hs
+: hash: 2d1944708e17641a8a96238f40f29562d1c0bdaf72ced82433529bdc18830e87
+/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/dist/x86_64-linux/Cabal-3.6.3.0/build/test/autogen/cabal_macros.h:
+  hash: 80d129d5c069ab327358f6a55b3cac879f7f71ca4b07c8f8ddfd7c97cb2e01ac
+/home/tobzdaman619/Exercism/haskell/lens-person/lens-person.cabal:
+  hash: 654817b7d2896a486b14519c000990e46a7c42b51bbb65187ed4d62db8b291d9
+/home/tobzdaman619/Exercism/haskell/lens-person/package.yaml:
+  hash: ce9cec48062b59f43385419e2fe783fa565f048b816fd4a092afe039f75f8b38
+/home/tobzdaman619/Exercism/haskell/lens-person/test/Tests.hs:
+  hash: 8afaa297439d554c10cfb6a2e5d646e1fbcb94a4aef2f40b453e75447fd6a27b
+/usr/include/stdc-predef.h:
+  hash: 64fdf694f7b3d51ec6c45c06dcb71ebbe9455742d3ea673012016668853d3bff
