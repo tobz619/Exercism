@@ -43,7 +43,7 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 bindir     = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\bin"
-libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\lib\\x86_64-windows-ghc-9.2.7\\alphametics-1.3.0.6-Gx5ruVHGy7JKMinVQrusOD"
+libdir     = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\lib\\x86_64-windows-ghc-9.2.7\\alphametics-1.3.0.6-8gBYvrE6POx3vBkm2enLaq"
 dynlibdir  = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\lib\\x86_64-windows-ghc-9.2.7"
 datadir    = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\share\\x86_64-windows-ghc-9.2.7\\alphametics-1.3.0.6"
 libexecdir = "C:\\Users\\Tobi\\Exercism\\haskell\\alphametics\\.stack-work\\install\\7eb224f8\\libexec\\x86_64-windows-ghc-9.2.7\\alphametics-1.3.0.6"
