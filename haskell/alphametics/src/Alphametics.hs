@@ -1,70 +1,96 @@
 module Alphametics (solve) where
 
 import Data.Char (ord, toUpper, chr)
+import Data.List
 import qualified Data.Map as Map
-import Text.Megaparsec (many, (<|>), Parsec, runParser)
+import Text.Megaparsec (many, (<|>), Parsec, runParser, parseTest, parse)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Char
-import Control.Applicative ()
 import Data.Void ( Void )
+import qualified Text.Megaparsec.Error
+import Control.Monad (forM)
 
 
-data Oper = Values String | Add Oper Oper | Sub Oper Oper
+data Oper = Value String | Add Oper Oper | Sub Oper Oper | Total Oper String deriving Show
 
 type MyParser a = Parsec Void String a
 
 solve :: String -> Maybe [(Char, Int)]
 solve puzzle = error "You need to implement this function."
 
+operMap :: (String -> String) -> Oper -> Oper
+operMap f (Value s) = Value (f s)
+operMap f (Add a b) = Add (operMap f a) (operMap f b)
+operMap f (Sub a b) = Sub (operMap f a) (operMap f b)
+operMap f (Total a b) = Total (operMap f a) (f b)
 
-evalExpr (Values s) = s
-evalExpr (Add a b) = zipWith getCharDifference (evalExpr a) (evalExpr b)
-evalExpr (Sub a b) = zipWith getCharDifference (evalExpr a) (evalExpr b)
+ops :: [(MyParser a, b)] -> MyParser b
+ops xs = foldr1 (<|>) op
+      where op = do (p, oper) <- xs
+                    return $ do _ <- p
+                                return oper
 
-addOps :: MyParser (Oper -> Oper -> Oper )
-addOps = add <|> minus
-        where add = char '+' >> return Add
-              minus = char '-' >> return Sub
+addOps :: MyParser (Oper -> Oper -> Oper)
+addOps = ops [ (char '+' <* space1, Add)
+             , (char '-' <* space1, Sub)
+             ]
 
-matchLen :: String -> String -> (String, String)
-matchLen a b | diff < 0  = ( replicate (negate diff) ' ' ++ a, b )
-             | otherwise = ( a, replicate diff ' ' ++ b )
-                  where diff = length a - length b
-                    
+equalsParser :: MyParser String
+equalsParser = do _ <- string "=="
+                  _ <- space1
+                  many letterChar
 
-exprParser :: MyParser (Oper -> Oper -> Oper, [Char], [Char])
-exprParser = do word1 <- many letterChar
-                _ <- space
-                op <- addOps
-                _ <- space 
-                word2 <- many letterChar
-                let (w1,w2) = matchLen word1 word2
-                return (op, w1, w2)
+parseValue :: MyParser Oper
+parseValue = Value <$> (many letterChar <* space1)
 
-diffParser :: MyParser Oper
-diffParser = do (f,a,b) <- exprParser
-                return $ f (Values a) (Values b)
+operBuilder :: MyParser Oper
+operBuilder = parseValue `chainl` addOps
 
-getList = (evalExpr <$>) . runParser (lexeme diffParser) "Failed to parse"
+exprParser :: MyParser Oper
+exprParser = Total <$> operBuilder <*> equalsParser
+
+chainl :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
+chainl p op = p >>= rest
+            where rest x = (do f <- op
+                               y <- p
+                               rest (f x y)) <|> return x
+
+chainr :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
+chainr p op = p >>= \x -> op >>= \f -> p `chainr` op >>= \y ->
+              return (f x y) <|> return x
 
 
-getCharOffset :: Char -> Int
-getCharOffset c = (ord . toUpper) c - ord 'A'
+padLeft :: [String] -> [String]
+padLeft strs = foldr (makeMax maxLen) [] strs
+            where maxLen = maximum . map length $ strs
+                  makeMax i inp acc = (replicate diff ' ' ++ inp) : acc
+                              where diff = i - length inp
 
-getValuePairs = map (\x -> (x, getCharOffset x))
+initUniques :: Oper -> Map.Map Char Int
+initUniques (Value s)   = foldr (`Map.insert` 0) Map.empty s
+initUniques (Add a b)   = Map.union (initUniques a) (initUniques b)
+initUniques (Sub a b)   = Map.union (initUniques a) (initUniques b)
+initUniques (Total a s) = Map.union (initUniques a)
+                                    (initUniques (Value s))
 
-getCharDifference :: Char -> Char -> Int
-getCharDifference c ' ' = c 
-getCharDifference ' ' d = d
-getCharDifference c d | (ord . toUpper) c + getCharOffset d > ord 'Z' = ord c + getCharOffset d - 26
-                      | otherwise = ord c + getCharOffset d
+assignValues m = Map.fromList $ go 0 (Map.toList m)
+            where go _ [] = []
+                  go acc ((k,_):xs) = (k,acc) : go (acc+1) xs
+                  
+            
 
-seeSumn = map getValuePairs ["five", "seven"]
 
-sumnMap = Map.fromList (concat seeSumn)
 
-sc :: MyParser ()
-sc = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
+{- testFuncs -}
 
-lexeme :: MyParser a -> MyParser a
-lexeme = L.lexeme sc
+runTotalOper :: String -> Either (Text.Megaparsec.Error.ParseErrorBundle String Void) Oper
+runTotalOper = parse exprParser ""
+
+testStatement :: Int -> String
+testStatement 1 = "FIVE + SEVEN == MONEY"
+testStatement 2 = "YACHT - CLUB == BOAT"
+testStatement 3 =  "A + REALLY - LONG + SUM == EVERYTHING"
+
+testParse x = runTotalOper $ testStatement x
+
+values x = assignValues . initUniques <$> testParse x
