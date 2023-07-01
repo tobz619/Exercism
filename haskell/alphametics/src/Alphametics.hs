@@ -1,4 +1,6 @@
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE TupleSections #-}
+
 module Alphametics (solve) where
 
 import Data.Char (ord, toUpper, chr)
@@ -16,7 +18,11 @@ import Text.Megaparsec.Error.Builder (err, utok)
 import Control.Applicative(liftA2)
 
 
-data Oper = Value String | Add Oper Oper | Sub Oper Oper | Total Oper String deriving Show
+data Oper = Word String
+          | Add Oper Oper 
+          | Sub Oper Oper 
+          | Total Oper String
+          deriving Show
 
 type MyParser = Parsec Void String
 
@@ -40,7 +46,7 @@ equalsParser = do _ <- string "=="
                   many letterChar
 
 parseValue :: MyParser Oper
-parseValue = Value <$> (many letterChar <* space1)
+parseValue = Word <$> (many letterChar <* space1)
 
 operBuilder :: MyParser Oper
 operBuilder = parseValue `chainl` addOps
@@ -58,18 +64,17 @@ chainr :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
 chainr p op = p >>= \x -> op >>= \f -> p `chainr` op >>= \y ->
               return (f x y) <|> return x
 
+frequencies :: String -> Map.Map Char Int
+frequencies = Map.fromListWith (+) . map ((,1) . toUpper)
 
-initUniques :: Oper -> Map.Map Char Int
-initUniques (Value s)   = foldr (`Map.insert` 0) (Map.fromList [(' ',0)]) s
-initUniques (Add a b)   = Map.union (initUniques a) (initUniques b)
-initUniques (Sub a b)   = Map.union (initUniques a) (initUniques b)
-initUniques (Total a s) = Map.union (initUniques a)
-                                    (initUniques (Value s))
+{-| Creates a Map containing Char (Value :: Int) pairs for me to reference and apply to the values into the correct order
+     Does this by union'ing mini maps together and creating a map where every character is paired with a value of how many
+     times it appears -}
 
-assignValues m = Map.fromList <$> (sequence . go 0 $ Map.toList m)
-            where go _ [] = []
-                  go acc ((k,_):xs) | acc > 10 = [Nothing]
-                                    | otherwise = Just (k,acc) : go (acc+1) xs
+initUniquesMap (Add a b)   = Map.unionWith (+) (initUniquesMap a) (initUniquesMap b)
+initUniquesMap (Sub a b)   = Map.unionWith (+) (initUniquesMap a) (initUniquesMap b)
+initUniquesMap (Total a s) = Map.unionWith (+) (initUniquesMap a) (frequencies s)
+initUniquesMap (Word s)    = frequencies s
 
 
 padLeft :: [String] -> [String]
@@ -78,51 +83,20 @@ padLeft strs = foldr (makeMax maxLen) [] strs
                   makeMax i inp acc = (replicate diff ' ' ++ inp) : acc
                               where diff = i - length inp
 
+opChars _ ' ' a  = toUpper a
+opChars _ a ' '  = toUpper a
+opChars op b c   = chr $ ((normalise b `op` normalise c) `mod` 26) + ord 'A'
+                  
+                  where normalise = ord . toUpper
+                 
 
+addChars =  opChars (+)
+subChars = opChars (-)
 
-totalEval (Total o ans) m = operEval o m ans
-      where operEval :: Oper -> Map.Map Char Int -> String -> [Maybe Int]
-            operEval (Value s) m ans = let [pad,_] = padLeft [s, ans]
-                                    in map (`Map.lookup` m) pad
-
-            operEval (Add a b) m ans   = let (resA, resB) = (operEval a m ans, operEval b m ans)
-                                    in zipWith (liftA2 (+)) resA resB
-
-            operEval (Sub a b) m ans   = let (resA, resB) = (operEval a m ans, operEval b m ans)
-                                    in zipWith (liftA2 (-)) resA resB
-            operEval _ _ _ = []
-totalEval _ _ = []
-
-addChars ' ' ' ' c m _ = pure $ Map.alter (const (Just 1)) c m
-addChars a b c m op | a == c && Map.lookup a m /= Just 0 = pure $ Map.alter (const (Just 0)) b m
-                    | b == c && Map.lookup b m /= Just 0 = pure $ Map.alter (const (Just 0)) a m
-                    | otherwise = let result = (`mod` 10) <$> liftA2 op (Map.lookup a m) (Map.lookup b m)
-                                      existing = Map.elems m
-                                      remaining = filter (`notElem` existing) [1..9]
-                                      combinations = [ (newA, newB, newC `mod` 10) | newA <- remaining, newB <- remaining
-                                                     , let newC = newA + newB
-                                                     , newA /= newB]
-                                      Just newMap = updateMapWithPotential a b c m op
-                                  in if m == newMap
-                                     then Just newMap
-                                     else updateMapWithPotential a b c m op >>=
-                                          \nextMap -> addChars a b c nextMap op
-
-
-updateMapWithPotential a b c m op = case combinations of
-                                     [] -> Nothing
-                                     _ ->  Just newMap
-
-            where existing = Map.elems m
-                  remaining = filter (`notElem` existing) [1..9]
-                  combinations = [ (newA, newB, newC) | newA <- remaining, newB <- remaining
-                                 , let newC = newA `op` newB
-                                 , newA /= newB]
-                  newMap = let (aVal, bVal, cVal) = head combinations
-                               aUp = Map.alter (const . pure $ aVal) a m
-                               bUp = Map.alter (const . pure $ bVal) b aUp
-                               cUp = Map.alter (const . pure $ cVal) c bUp
-                            in cUp
+-- getStrOper (Word s) = [s]
+-- getStrOper (Add a b) = (getStrOper, getStrOper b)
+-- getStrOper (Sub a b) = getStrOper a ++ getStrOper b
+-- getStrOper (Total o _) = getStrOper o
 
 {- testFuncs -}
 
@@ -130,20 +104,16 @@ runTotalOper :: String -> Either (ParseErrorBundle String Void) Oper
 runTotalOper = parse exprParser ""
 
 testStatement :: Int -> String
-testStatement 1 = "FIVE + SEVEN == MONEY"
+testStatement 1 = "SEND + MORE == MONEY"
 testStatement 2 = "YACHT - CLUB == BOAT"
 testStatement 3 =  "A + REALLY - LONG + SUM == EVERYTHING"
 testStatement _ = ""
-             
+
 
 testParse :: Int -> Either (ParseErrorBundle String Void) Oper
 testParse = runTotalOper . testStatement
 
-values :: Int -> Maybe (Map.Map Char Int)
-values x = case  initUniques <$> testParse x of
-            Left _ -> Nothing
-            Right a -> Just a
-
-someFunc = totalEval res v
-            where Just v = values 1
-                  Right res = testParse 1
+values :: Int -> Map.Map Char Int
+values x = case  initUniquesMap <$> testParse x of
+            Left _ -> Map.empty
+            Right a -> a
