@@ -54,8 +54,8 @@ getCharOffset c = (ord . toUpper) c - ord 'A'
 getValuePairs = map (\x -> (x, getCharOffset x))
 
 getCharDifference :: Char -> Char -> Int
-getCharDifference c ' ' = c 
-getCharDifference ' ' d = d
+getCharDifference c ' ' = ord c 
+getCharDifference ' ' d = ord d
 getCharDifference c d | (ord . toUpper) c + getCharOffset d > ord 'Z' = ord c + getCharOffset d - 26
                       | otherwise = ord c + getCharOffset d
 
