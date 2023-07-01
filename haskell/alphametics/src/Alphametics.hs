@@ -1,70 +1,149 @@
+{-# LANGUAGE GADTs #-}
 module Alphametics (solve) where
 
 import Data.Char (ord, toUpper, chr)
+import Data.List
 import qualified Data.Map as Map
-import Text.Megaparsec (many, (<|>), Parsec, runParser)
+import Text.Megaparsec (many, (<|>), Parsec, runParser, parseTest, parse)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Text.Megaparsec.Char
-import Control.Applicative ()
 import Data.Void ( Void )
+import qualified Text.Megaparsec.Error
+import Control.Monad (forM)
+import Data.List.NonEmpty (NonEmpty)
+import Text.Megaparsec.Error
+import Text.Megaparsec.Error.Builder (err, utok)
+import Control.Applicative(liftA2)
 
 
-data Oper = Values String | Add Oper Oper | Sub Oper Oper
+data Oper = Value String | Add Oper Oper | Sub Oper Oper | Total Oper String deriving Show
 
-type MyParser a = Parsec Void String a
+type MyParser = Parsec Void String
 
 solve :: String -> Maybe [(Char, Int)]
 solve puzzle = error "You need to implement this function."
 
+ops :: [(MyParser a, b)] -> MyParser b
+ops xs = foldr1 (<|>) op
+      where op = do (p, oper) <- xs
+                    return $ do _ <- p
+                                return oper
 
-evalExpr (Values s) = s
-evalExpr (Add a b) = zipWith getCharDifference (evalExpr a) (evalExpr b)
-evalExpr (Sub a b) = zipWith getCharDifference (evalExpr a) (evalExpr b)
+addOps :: MyParser (Oper -> Oper -> Oper)
+addOps = ops [ (char '+' <* space1, Add)
+             , (char '-' <* space1, Sub)
+             ]
 
-addOps :: MyParser (Oper -> Oper -> Oper )
-addOps = add <|> minus
-        where add = char '+' >> return Add
-              minus = char '-' >> return Sub
+equalsParser :: MyParser String
+equalsParser = do _ <- string "=="
+                  _ <- space1
+                  many letterChar
 
-matchLen :: String -> String -> (String, String)
-matchLen a b | diff < 0  = ( replicate (negate diff) ' ' ++ a, b )
-             | otherwise = ( a, replicate diff ' ' ++ b )
-                  where diff = length a - length b
-                    
+parseValue :: MyParser Oper
+parseValue = Value <$> (many letterChar <* space1)
 
-exprParser :: MyParser (Oper -> Oper -> Oper, [Char], [Char])
-exprParser = do word1 <- many letterChar
-                _ <- space
-                op <- addOps
-                _ <- space 
-                word2 <- many letterChar
-                let (w1,w2) = matchLen word1 word2
-                return (op, w1, w2)
+operBuilder :: MyParser Oper
+operBuilder = parseValue `chainl` addOps
 
-diffParser :: MyParser Oper
-diffParser = do (f,a,b) <- exprParser
-                return $ f (Values a) (Values b)
+exprParser :: MyParser Oper
+exprParser = Total <$> operBuilder <*> equalsParser
 
-getList = (evalExpr <$>) . runParser (lexeme diffParser) "Failed to parse"
+chainl :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
+chainl p op = p >>= rest
+            where rest x = (do f <- op
+                               y <- p
+                               rest (f x y)) <|> return x
+
+chainr :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
+chainr p op = p >>= \x -> op >>= \f -> p `chainr` op >>= \y ->
+              return (f x y) <|> return x
 
 
-getCharOffset :: Char -> Int
-getCharOffset c = (ord . toUpper) c - ord 'A'
+initUniques :: Oper -> Map.Map Char Int
+initUniques (Value s)   = foldr (`Map.insert` 0) (Map.fromList [(' ',0)]) s
+initUniques (Add a b)   = Map.union (initUniques a) (initUniques b)
+initUniques (Sub a b)   = Map.union (initUniques a) (initUniques b)
+initUniques (Total a s) = Map.union (initUniques a)
+                                    (initUniques (Value s))
 
-getValuePairs = map (\x -> (x, getCharOffset x))
+assignValues m = Map.fromList <$> (sequence . go 0 $ Map.toList m)
+            where go _ [] = []
+                  go acc ((k,_):xs) | acc > 10 = [Nothing]
+                                    | otherwise = Just (k,acc) : go (acc+1) xs
 
-getCharDifference :: Char -> Char -> Int
-getCharDifference c ' ' = ord c 
-getCharDifference ' ' d = ord d
-getCharDifference c d | (ord . toUpper) c + getCharOffset d > ord 'Z' = ord c + getCharOffset d - 26
-                      | otherwise = ord c + getCharOffset d
 
-seeSumn = map getValuePairs ["five", "seven"]
+padLeft :: [String] -> [String]
+padLeft strs = foldr (makeMax maxLen) [] strs
+            where maxLen = maximum . map length $ strs
+                  makeMax i inp acc = (replicate diff ' ' ++ inp) : acc
+                              where diff = i - length inp
 
-sumnMap = Map.fromList (concat seeSumn)
 
-sc :: MyParser ()
-sc = L.space space1 (L.skipLineComment "//") (L.skipBlockComment "/*" "*/")
 
-lexeme :: MyParser a -> MyParser a
-lexeme = L.lexeme sc
+totalEval (Total o ans) m = operEval o m ans
+      where operEval :: Oper -> Map.Map Char Int -> String -> [Maybe Int]
+            operEval (Value s) m ans = let [pad,_] = padLeft [s, ans]
+                                    in map (`Map.lookup` m) pad
+
+            operEval (Add a b) m ans   = let (resA, resB) = (operEval a m ans, operEval b m ans)
+                                    in zipWith (liftA2 (+)) resA resB
+
+            operEval (Sub a b) m ans   = let (resA, resB) = (operEval a m ans, operEval b m ans)
+                                    in zipWith (liftA2 (-)) resA resB
+            operEval _ _ _ = []
+totalEval _ _ = []
+
+addChars ' ' ' ' c m _ = pure $ Map.alter (const (Just 1)) c m
+addChars a b c m op | a == c && Map.lookup a m /= Just 0 = pure $ Map.alter (const (Just 0)) b m
+                    | b == c && Map.lookup b m /= Just 0 = pure $ Map.alter (const (Just 0)) a m
+                    | otherwise = let result = (`mod` 10) <$> liftA2 op (Map.lookup a m) (Map.lookup b m)
+                                      existing = Map.elems m
+                                      remaining = filter (`notElem` existing) [1..9]
+                                      combinations = [ (newA, newB, newC `mod` 10) | newA <- remaining, newB <- remaining
+                                                     , let newC = newA + newB
+                                                     , newA /= newB]
+                                      Just newMap = updateMapWithPotential a b c m op
+                                  in if m == newMap
+                                     then Just newMap
+                                     else updateMapWithPotential a b c m op >>=
+                                          \nextMap -> addChars a b c nextMap op
+
+
+updateMapWithPotential a b c m op = case combinations of
+                                     [] -> Nothing
+                                     _ ->  Just newMap
+
+            where existing = Map.elems m
+                  remaining = filter (`notElem` existing) [1..9]
+                  combinations = [ (newA, newB, newC) | newA <- remaining, newB <- remaining
+                                 , let newC = newA `op` newB
+                                 , newA /= newB]
+                  newMap = let (aVal, bVal, cVal) = head combinations
+                               aUp = Map.alter (const . pure $ aVal) a m
+                               bUp = Map.alter (const . pure $ bVal) b aUp
+                               cUp = Map.alter (const . pure $ cVal) c bUp
+                            in cUp
+
+{- testFuncs -}
+
+runTotalOper :: String -> Either (ParseErrorBundle String Void) Oper
+runTotalOper = parse exprParser ""
+
+testStatement :: Int -> String
+testStatement 1 = "FIVE + SEVEN == MONEY"
+testStatement 2 = "YACHT - CLUB == BOAT"
+testStatement 3 =  "A + REALLY - LONG + SUM == EVERYTHING"
+testStatement _ = ""
+             
+
+testParse :: Int -> Either (ParseErrorBundle String Void) Oper
+testParse = runTotalOper . testStatement
+
+values :: Int -> Maybe (Map.Map Char Int)
+values x = case  initUniques <$> testParse x of
+            Left _ -> Nothing
+            Right a -> Just a
+
+someFunc = totalEval res v
+            where Just v = values 1
+                  Right res = testParse 1
