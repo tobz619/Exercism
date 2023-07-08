@@ -1,0 +1,29 @@
+Test suite test: RUNNING...
+
+rebase
+  single bit one to decimal [v]
+  binary to single decimal [v]
+  single decimal to binary [v]
+  binary to multiple decimal [v]
+  decimal to binary [v]
+  trinary to hexadecimal [v]
+  hexadecimal to trinary [v]
+  15-bit integer [v]
+  empty list [v]
+  single zero [v]
+  multiple zeros [v]
+  leading zeros [v]
+  input base is one [v]
+  input base is zero [v]
+  input base is negative [v]
+  negative digit [v]
+  invalid positive digit [v]
+  output base is one [v]
+  output base is zero [v]
+  output base is negative [v]
+  both bases are negative [v]
+
+Finished in 0.0012 seconds
+21 examples, 0 failures
+Test suite test: PASS
+Test suite logged to: C:\Users\Tobi\Exercism\haskell\all-your-base\dist-newstyle\build\x86_64-windows\ghc-9.2.7\all-your-base-2.3.0.8\t\test\test\all-your-base-2.3.0.8-test.log
