@@ -23,7 +23,7 @@ Integral tests
     difference (11 :: Int) [v]
     difference (12 :: Integer) [v]
 
-Finished in 0.0014 seconds
+Finished in 0.0011 seconds
 15 examples, 0 failures
 Test suite test: PASS
 Test suite logged to: C:\Users\Tobi\Exercism\haskell\difference-of-squares\dist-newstyle\build\x86_64-windows\ghc-9.2.7\difference-of-squares-1.2.0.7\t\test\test\difference-of-squares-1.2.0.7-test.log
