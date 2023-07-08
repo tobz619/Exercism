@@ -19,8 +19,8 @@ import Control.Applicative(liftA2)
 
 
 data Oper = Word String
-          | Add Oper Oper 
-          | Sub Oper Oper 
+          | Add Oper Oper
+          | Sub Oper Oper
           | Total Oper String
           deriving Show
 
@@ -29,6 +29,7 @@ type MyParser = Parsec Void String
 solve :: String -> Maybe [(Char, Int)]
 solve puzzle = error "You need to implement this function."
 
+{- Parsing functions -}
 ops :: [(MyParser a, b)] -> MyParser b
 ops xs = foldr1 (<|>) op
       where op = do (p, oper) <- xs
@@ -64,13 +65,14 @@ chainr :: MyParser a -> MyParser (a -> a -> a) -> MyParser a
 chainr p op = p >>= \x -> op >>= \f -> p `chainr` op >>= \y ->
               return (f x y) <|> return x
 
+{- Map functions -}
+
 frequencies :: String -> Map.Map Char Int
 frequencies = Map.fromListWith (+) . map ((,1) . toUpper)
 
 {-| Creates a Map containing Char (Value :: Int) pairs for me to reference and apply to the values into the correct order
      Does this by union'ing mini maps together and creating a map where every character is paired with a value of how many
      times it appears -}
-
 initUniquesMap (Add a b)   = Map.unionWith (+) (initUniquesMap a) (initUniquesMap b)
 initUniquesMap (Sub a b)   = Map.unionWith (+) (initUniquesMap a) (initUniquesMap b)
 initUniquesMap (Total a s) = Map.unionWith (+) (initUniquesMap a) (frequencies s)
@@ -85,18 +87,32 @@ padLeft strs = foldr (makeMax maxLen) [] strs
 
 opChars _ ' ' a  = toUpper a
 opChars _ a ' '  = toUpper a
-opChars op b c   = chr $ ((normalise b `op` normalise c) `mod` 26) + ord 'A'
-                  
+opChars op b c   = chr (normalise b `op` normalise c)
+
                   where normalise = ord . toUpper
-                 
+
+
 
 addChars =  opChars (+)
-subChars = opChars (-)
+minChars = opChars (-)
 
--- getStrOper (Word s) = [s]
--- getStrOper (Add a b) = (getStrOper, getStrOper b)
--- getStrOper (Sub a b) = getStrOper a ++ getStrOper b
--- getStrOper (Total o _) = getStrOper o
+
+opString op x y = zipWith (opChars op) xs ys
+            where [xs,ys] = padLeft [x, y]
+
+
+addString = opString (+)
+minString = opString (-)
+
+
+evalNumList [] = []
+evalNumList [x] = dealWith (divMod x 10)
+            where dealWith (0,y) = [y]
+                  dealWith (d,m) = [d-1,m]
+evalNumList (x:y:xs) = carryOver (divMod x 10)
+            where carryOver (0,z) = z :evalNumList (y: xs)
+                  carryOver (d,z) = d-1 : evalNumList (y+z : xs) 
+
 
 {- testFuncs -}
 
@@ -116,4 +132,9 @@ testParse = runTotalOper . testStatement
 values :: Int -> Map.Map Char Int
 values x = case  initUniquesMap <$> testParse x of
             Left _ -> Map.empty
-            Right a -> a
+            Right mp -> mp
+
+a = map ord "SEND"
+b = map ord "MORE"
+c = zipWith (+) a b
+d = map (`mod` ord 'A') c
