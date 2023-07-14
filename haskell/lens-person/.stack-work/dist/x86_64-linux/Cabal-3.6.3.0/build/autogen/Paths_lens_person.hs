@@ -43,7 +43,7 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 bindir     = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/bin"
-libdir     = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/lens-person-0.1.0.3-6I6fRXcFQcVKjSnEB22gn0"
+libdir     = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/lens-person-0.1.0.3-KXTI8I6m51gIq5H25KEHv4"
 dynlibdir  = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7"
 datadir    = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/share/x86_64-linux-ghc-9.2.7/lens-person-0.1.0.3"
 libexecdir = "/home/tobzdaman619/Exercism/haskell/lens-person/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/libexec/x86_64-linux-ghc-9.2.7/lens-person-0.1.0.3"
