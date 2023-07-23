@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 import Data.Foldable     (for_)
 import Test.Hspec        (Spec, describe, it, shouldBe)

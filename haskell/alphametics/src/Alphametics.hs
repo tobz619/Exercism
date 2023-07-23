@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE KindSignatures #-}
 
 module Alphametics (solve) where
 
@@ -17,6 +18,15 @@ import Text.Megaparsec.Error
 import Text.Megaparsec.Error.Builder (err, utok)
 import Control.Applicative(liftA2)
 
+data Oper2 :: * -> * where
+      EWord :: String -> Oper2 String
+      EAdd :: Oper2 a -> Oper2 b -> Oper2 (a -> b -> String)
+      ESub :: Oper2 a -> Oper2 b -> Oper2 (a -> b -> String)
+      ETotal :: Oper2 a -> Oper2 String -> Oper2 [Int]
+
+eval :: Oper2 a -> a
+eval (EWord s) = s
+eval _ = undefined
 
 data Oper = Word String
           | Add Oper Oper

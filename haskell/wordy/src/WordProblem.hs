@@ -69,5 +69,3 @@ exprToInt (Div v1 v2)
 exprToInt (Negation v1) = negate <$> exprToInt v1
 exprToInt (Subtr v1 v2) = subtract <$> exprToInt v2 <*> exprToInt v1
 exprToInt _ = Nothing
-
-

@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/bin"
-libdir     = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6-8gBYvrE6POx3vBkm2enLaq"
-dynlibdir  = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/lib/x86_64-linux-ghc-9.2.7"
-datadir    = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/share/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6"
-libexecdir = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/libexec/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6"
-sysconfdir = "/home/tobzdaman619/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/458d2a95f8538a5d8cc40efd48b50f8174ae7e40c4531165c9c89a9c26874bb1/9.2.7/etc"
+bindir     = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/bin"
+libdir     = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/lib/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6-8gBYvrE6POx3vBkm2enLaq"
+dynlibdir  = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/lib/x86_64-linux-ghc-9.2.7"
+datadir    = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/share/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6"
+libexecdir = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/libexec/x86_64-linux-ghc-9.2.7/alphametics-1.3.0.6"
+sysconfdir = "/mnt/chromeos/GoogleDrive/MyDrive/Tech-Papers/Programming/Exercism/haskell/alphametics/.stack-work/install/x86_64-linux/5486d4a7f44b8b6b5ec78604639b306fa86887931664d42e94fc765cbcd69da3/9.2.7/etc"
 
 getBinDir     = catchIO (getEnv "alphametics_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "alphametics_libdir")     (\_ -> return libdir)
