@@ -10,7 +10,8 @@ build-type:     Simple
 
 library
   exposed-modules:
-      BankAccount
+      BankAccount, 
+      BankAccountState2
   other-modules:
       Paths_bank_account
   hs-source-dirs:
