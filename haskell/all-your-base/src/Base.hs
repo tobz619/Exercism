@@ -8,6 +8,7 @@ rebase i o inputDigits =
     fromBase i inputDigits >>= toBase o
 
 
+fromBase :: Integral b => b -> [b] -> Either (Error b) b
 fromBase base is = (sum <$>) . sequence $ go 0 (reverse is)
         where go _ [] | base <= 1 = [Left InvalidInputBase]
                       | otherwise = []
@@ -17,6 +18,7 @@ fromBase base is = (sum <$>) . sequence $ go 0 (reverse is)
                             | otherwise = Right (x*base^pos) : go (pos+1) xs
               
 
+toBase :: Integral b => b -> b -> Either (Error b) [b]
 toBase base = (reverse <$>) . sequence . go
                 where go 0   = []
                       go n | base <= 1 = [Left InvalidOutputBase]
