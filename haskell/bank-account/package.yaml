@@ -10,7 +10,8 @@ library:
   ghc-options: -Wall
   dependencies:
    - containers
-   - stm       # List here the packages you
+   - stm
+   - mtl       # List here the packages you
   # - bar       # want to use in your solution.
 
 tests:
