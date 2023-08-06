@@ -1,4 +1,5 @@
-module BankAccount
+{-# OPTIONS_GHC -Wno-unused-do-bind #-}
+module BankAccountState
   ( BankAccount,
     closeAccount,
     getBalance,
@@ -8,33 +9,33 @@ module BankAccount
 where
 
 import Control.Monad.State
-    ( modify, evalStateT, MonadIO(liftIO), MonadState(get), StateT )
 
 type BankAccount = Maybe Integer
 
 openAccount :: BankAccount
-openAccount = Just 0
+openAccount = pure 0
 
 closeAccount :: StateT BankAccount IO ()
-closeAccount = modify (const Nothing) >> getBalance >>= liftIO . print
+closeAccount = modify (const Nothing) >> get >>= liftIO . print
 
-getBalance :: StateT BankAccount IO BankAccount
-getBalance = get
+getBalance ::  StateT BankAccount IO ()
+getBalance = get >>= liftIO . print
 
 
-incrementBalance :: Integer -> StateT BankAccount IO ()
+incrementBalance :: Integer -> StateT BankAccount IO BankAccount
 incrementBalance amount = do modify $ fmap (+ amount)
-                             getBalance >>= liftIO . print
+                             get >>=  liftIO . print
+                             get
 
 
 
-someFuncs :: StateT BankAccount IO ()
+
 someFuncs = do  incrementBalance 10
                 incrementBalance 50
                 incrementBalance (-30)
+                getBalance
                 closeAccount
                 incrementBalance 30
                 incrementBalance 55
 
-someTest :: IO ()
 someTest = evalStateT someFuncs openAccount
