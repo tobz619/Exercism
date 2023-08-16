@@ -1,56 +1,62 @@
-module Deque (Deque, mkDeque, pop, push, shift, unshift) where
+module Deque where
 
 import Data.IORef
 import Control.Monad.IO.Class (MonadIO(liftIO))
 
-data Deque a = Nil | Node { prev :: Deque a, current :: a, next :: Deque a}
+{- Using Haskell lists feels cheap: going to steal this FingerTree implementation from 
+   https://www.youtube.com/watch?v=-HZ4bo_USvE 
+-}
+
+
+type Deque a = ([a],[a])
 
 mkDeque :: IO (IORef (Deque a))
-mkDeque = newIORef Nil 
+mkDeque = newIORef ([], []) 
 
-pop :: IORef (Deque a) -> IO (Maybe a)
-pop deque = do q <- readIORef deque 
-               let (res, newq) = popper q
-               writeIORef deque newq
-               return res
+pop :: Show a => IORef (Deque a) -> IO (Maybe a)
+pop ref = do q <- readIORef ref
+             process q
+                  where process (_,[]) = return Nothing
+                        process (_,xs) = do writeIORef ref (reverse (tail xs), tail xs)
+                                            readIORef ref >>= print
+                                            return $ Just . head $ xs
 
-push :: IORef (Deque a) -> a -> IO ()
-push deque x = modifyIORef deque (pusher x)
+push :: Show a => IORef (Deque a) -> a -> IO ()
+push ref x = do q <- readIORef ref
+                process q
+                  where process (_,xs) = do writeIORef ref (reverse (x:xs), x:xs)
+                                            readIORef ref >>= print
 
-unshift :: IORef (Deque a) -> a -> IO ()
-unshift deque x = modifyIORef deque (unshifter x)
+unshift :: Show a => IORef (Deque a) -> a -> IO ()
+unshift ref x = do q <- readIORef ref
+                   process q
+                  where process (xs,_) = do writeIORef ref (x:xs, reverse (x:xs))
+                                            readIORef ref >>= print
 
-shift :: IORef (Deque a) -> IO (Maybe a)
-shift deque = do q <- readIORef deque 
-                 let (res, newq) = popper q
-                 writeIORef deque newq
-                 return res
-
+shift :: Show a => IORef (Deque a) -> IO (Maybe a)
+shift ref = do q <- readIORef ref
+               process q
+                  where process ([],_) = return Nothing
+                        process (xs,_) = do writeIORef ref (tail xs, reverse (tail xs))
+                                            readIORef ref >>= print
+                                            return $ Just . head $ xs
 
 test = do
       deque <- mkDeque
-      push deque 'a' >>= print
-      push deque 'b' >>= print
+      push deque 'a'
+      push deque 'b'
       pop deque >>= print
       pop deque >>= print
 
-popper :: Deque a -> (Maybe a, Deque a)
-popper Nil              = (Nothing, Nil)
-popper (Node Nil x Nil) = (Just x, Nil)
-popper (Node p x Nil) = let newNode = Node (prev p) (current p) Nil
-                         in (Just x, newNode)
-popper (Node _ _ ne) = popper ne
-
-pusher :: a -> Deque a -> Deque a
-pusher x Nil                 = Node Nil x Nil
-pusher x last@(Node p c Nil) = let newLast = Node p c newNode
-                                   newNode = Node newLast x Nil
-                                in newNode
-pusher x n = pusher x (next n)
-
-unshifter :: a -> Deque a -> Deque a
-unshifter x Nil                   = Node Nil x Nil
-unshifter x first@(Node Nil c ne) = let newFirst = Node Nil x newNext
-                                        newNext = Node newFirst c ne
-                                     in newNext
-unshifter x n  = unshifter x (prev n)
+test2 = do
+      deque <- mkDeque
+      push deque 'a'
+      push deque 'b'
+      pop deque
+      push deque 'c'
+      shift deque
+      unshift deque 'd'
+      push deque 'e'
+      shift deque
+      pop deque
+      pop deque
