@@ -41,11 +41,6 @@ meetupDay Teenth weekday year month = let weekMap = weekDayPair $ teenthDays yea
 getFirstDayOfMonth :: Year -> MonthOfYear -> Day
 getFirstDayOfMonth year month = fromGregorian year month 1
 
-
-getFirstWeekday :: Year -> MonthOfYear -> Weekday
-getFirstWeekday year month = let d = toModifiedJulianDay $ getFirstDayOfMonth year month
-                              in toEnum . fromInteger $ mod (d+2) 7
-
 getNthDaysOfMonth :: Integer -> Year -> MonthOfYear -> [Day]
 getNthDaysOfMonth 0 _ _ = []
 getNthDaysOfMonth n y m = let d1 = getFirstDayOfMonth y m 
@@ -83,5 +78,3 @@ teenthDays y m = take 7 . drop 12 $ monthDays
 lastWeek :: Year -> MonthOfYear -> [Day]
 lastWeek y m = take 7 . reverse $ monthDays
                 where monthDays = getDaysOfMonth y m 
-
-
