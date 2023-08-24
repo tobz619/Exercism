@@ -2,35 +2,26 @@ module Queens (boardString, canAttack) where
 
 boardString :: Maybe (Int, Int) -> Maybe (Int, Int) -> String
 boardString white black = concat [makeB (x, y) | x <- [0 .. 7], y <- [0 .. 7]]
-                    where makeB (x,y)
+                    where makeB (_,7) = "_\n"
+                          makeB (x,y)
                             | Just (x,y) == white = "W "
                             | Just (x,y) == black = "B "
                             | otherwise = "_ "
 
 canAttack :: (Int, Int) -> (Int, Int) -> Bool
-canAttack queenA queenB
- | or [ sameRow queenA queenB
-             , sameCol queenA queenB
-             , sameDiag queenA queenB
-             , sameAntidiag queenA queenB ] = True
- | otherwise = False
+canAttack queenA queenB = or [ sameRow queenA queenB
+                             , sameCol queenA queenB
+                             , sameDiag queenA queenB
+                             , sameAntidiag queenA queenB ]
 
 sameRow :: (Int, Int) -> (Int, Int) -> Bool
-sameRow (i,j) (k,l)
- | i == k = True
- | otherwise = False
+sameRow (i,_) (k,_) = i == k 
 
 sameCol :: (Int, Int) -> (Int, Int) -> Bool
-sameCol (i,j) (k,l)
- | j == l = True
- | otherwise = False
+sameCol (_,j) (_,l) = j == l
 
 sameDiag :: (Int, Int) -> (Int, Int) -> Bool
-sameDiag (i,j) (k,l)
- | (i-k) == (j-l) = True
- | otherwise = False
+sameDiag (i,j) (k,l) = (i-k) == (j-l)
 
 sameAntidiag :: (Int, Int) -> (Int, Int) -> Bool
-sameAntidiag (i,j) (k,l)
- | (i-k) == (l-j) = True
- | otherwise = False
+sameAntidiag (i,j) (k,l) = (i-k) == (l-j)
