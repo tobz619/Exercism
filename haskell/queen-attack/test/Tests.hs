@@ -81,6 +81,6 @@ specs = do
                   , ("can attack on second diagonal", (2, 2), (3, 1), True )
                   , ("can attack on third diagonal" , (2, 2), (1, 1), True )
                   , ("can attack on fourth diagonal", (2, 2), (5, 5), True ) 
-                  , ("can attack in right corner"   , (0, 7), (5, 7), True )  ]
+                  , ("can attack in rightmost columns"   , (0, 7), (5, 7), True )  ]
 
       for_ cases test
