@@ -1,6 +1,6 @@
 module Meetup (Weekday(..), Schedule(..), meetupDay) where
 
-import Data.Time.Calendar (Day (ModifiedJulianDay, toModifiedJulianDay), addDays, fromGregorian, MonthOfYear, Year)
+import Data.Time.Calendar (Day (ModifiedJulianDay, toModifiedJulianDay), addDays, fromGregorian)
 
 data Weekday = Monday
              | Tuesday
@@ -17,6 +17,9 @@ data Schedule = First
               | Fourth
               | Last
               | Teenth
+
+type MonthOfYear = Int
+type Year = Integer
 
 meetupDay :: Schedule -> Weekday -> Integer -> Int -> Day
 meetupDay First weekday year month = let weekMap = weekDayPair $ getNthDaysOfMonth 1 year month
