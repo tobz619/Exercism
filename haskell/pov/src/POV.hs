@@ -2,13 +2,8 @@
 {-# HLINT ignore "Use >=>" #-}
 module POV (fromPOV, tracePathBetween) where
 
-import Data.Tree (Tree (Node, rootLabel), drawTree)
-import Data.Maybe (mapMaybe, listToMaybe)
+import Data.Tree (Tree (Node, rootLabel))
 import Control.Monad (msum)
-import Data.List (union, (\\))
-
-data Crumb a = Crumb a [Tree a] [Tree a] deriving Show
-type Zipper a = (Tree a, Crumb a)
 
 reparent :: Eq a => Tree a -> Tree a -> Tree a
 reparent (Node x xs) (Node y ys) = Node y (Node x xs': ys)
