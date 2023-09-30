@@ -11,9 +11,7 @@ largestProduct size digits =
 
 productString :: String -> Either Error Integer
 productString inp = product <$> traverse digithdlr inp
-        where digithdlr val = case readMaybe [val] :: Maybe Integer of
-                                Nothing -> Left $ InvalidDigit val
-                                Just dig -> Right dig
+        where digithdlr val = maybe (Left $ InvalidDigit val) Right (readMaybe [val])
 
 getSeriesOf :: Int -> String -> Either Error [String]
 getSeriesOf n xs = case [take n xs' | xs' <- tails xs, length (take n xs') == n] of
