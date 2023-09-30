@@ -20,7 +20,12 @@ fromPOV :: Eq a => a -> Tree a -> Maybe (Tree a)
 fromPOV x tree = foldl1 reparent <$> tracePathTo x tree
 
 tracePathBetween :: Eq a => a -> a -> Tree a -> Maybe [a]
-tracePathBetween from to tree = fromPOV from tree >>= \newtree ->
-                                tracePathTo to newtree >>= \path ->
-                                return $ map rootLabel path
+tracePathBetween from to tree = 
+      let newtree = fromPOV from tree
+          newpath = newtree >>= tracePathTo to
+       in (fmap.fmap) rootLabel newpath 
+      
+      -- fromPOV from tree >>= \newtree ->
+      -- tracePathTo to newtree >>= \path ->
+      -- return $ map rootLabel path
 
