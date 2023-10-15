@@ -6,7 +6,7 @@ data Error = InvalidSpan | InvalidDigit Char deriving (Show, Eq)
 
 largestProduct :: Int -> String -> Either Error Integer
 largestProduct size digits = 
-    mkProducts size digits >>= foldl1 getMaximum
+    mkProducts size digits >>= foldr1 getMaximum
 
 
 productString :: String -> Either Error Integer

@@ -12,9 +12,10 @@ reparent (Node x xs) (Node y ys) = Node y (Node x xs': ys)
 tracePathTo :: Eq a => a -> Tree a -> Maybe [Tree a]
 tracePathTo x t@(Node r []) | x == r = Just [t]
                             | otherwise = Nothing
-tracePathTo x tree@(Node r rs) = go [] tree
-                  where go acc t@(Node r rs) | x == r = Just . reverse $ (t:acc)
-                                             | otherwise = msum $ go (t:acc) <$> rs
+tracePathTo x tree = go [] tree
+            where go acc t@(Node r rs) 
+                    | x == r = Just . reverse $ (t:acc)
+                    | otherwise = msum $ go (t:acc) <$> rs
 
 fromPOV :: Eq a => a -> Tree a -> Maybe (Tree a)
 fromPOV x tree = foldl1 reparent <$> tracePathTo x tree
@@ -23,9 +24,5 @@ tracePathBetween :: Eq a => a -> a -> Tree a -> Maybe [a]
 tracePathBetween from to tree = 
       let newtree = fromPOV from tree
           newpath = newtree >>= tracePathTo to
-       in (fmap.fmap) rootLabel newpath 
-      
-      -- fromPOV from tree >>= \newtree ->
-      -- tracePathTo to newtree >>= \path ->
-      -- return $ map rootLabel path
+       in (fmap.fmap) rootLabel newpath
 
