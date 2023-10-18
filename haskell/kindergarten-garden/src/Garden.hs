@@ -4,16 +4,18 @@ module Garden
     , lookupPlants
     ) where
 
+import Data.Maybe ( fromMaybe )
+
 data Plant = Clover
            | Grass
            | Radishes
            | Violets
            deriving (Eq, Show)
 
-data Garden = Garden {front :: [(String, String)], back :: [(String, String)]}
+data Garden = Garden {front :: [(String, String)], back :: [(String, String)]} deriving Show
 
 garden :: [String] -> String -> Garden
-garden students plants = let (frontg, backg) = span (== '\n') plants
+garden students plants = let [frontg, backg] = lines plants
                              go (facc, bacc) [] _ = Garden facc bacc
                              go (facc, bacc) (s:ss) (fg, bg) = go
                                 ( (s, take 2 fg):facc
@@ -28,8 +30,9 @@ lookupPlants student garden =
                                 lookup student (front garden) <*>
                                 lookup student (back garden)
         studentPlants = maybe [] (fmap findPlant) studentPlantsStr
-     in maybe [] id $ sequence studentPlants
+     in fromMaybe [] $ sequence studentPlants
 
+findPlant :: Char -> Maybe Plant
 findPlant 'C' = Just Clover
 findPlant 'G' = Just Grass 
 findPlant 'R' = Just Radishes
