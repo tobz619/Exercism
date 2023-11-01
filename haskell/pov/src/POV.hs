@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use >=>" #-}
 module POV (fromPOV, tracePathBetween) where
 
 import Data.Tree (Tree (Node, rootLabel))
