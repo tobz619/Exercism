@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:binary-search"
+
+    - path: "test"
+      component: "binary-search:test:test"
