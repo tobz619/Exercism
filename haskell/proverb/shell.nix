@@ -4,7 +4,7 @@
 pkgs.haskell.packages.ghc928.shellFor {
   packages = hpkgs: [
     hpkgs.distribution-nixpkgs
-    ( hpkgs.callPackage ./alphametics.nix {} )
+    (hpkgs.callPackage ./proverb.nix {})
   ];
 
   nativeBuildInputs = with pkgs; [
