@@ -1,9 +1,4 @@
-{ mkDerivation, base, containers, hspec, lib, megaparsec }:
-mkDerivation {
-  pname = "alphametics";
-  version = "1.3.0.6";
-  src = ./.;
-  libraryHaskellDepends = [ base containers megaparsec ];
-  testHaskellDepends = [ base hspec ];
-  license = "unknown";
-}
+{ pkgs ? import (fetchTarball "channel:nixos-23.11") {}
+}:
+
+pkgs.haskell.packages.ghc928.callPackage ./alphametics.nix {}
