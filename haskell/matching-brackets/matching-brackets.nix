@@ -6,7 +6,6 @@ mkDerivation {
   libraryHaskellDepends = [ base ];
   libraryToolDepends = [ hpack ];
   testHaskellDepends = [ base hspec ];
-  doCheck = false;
   prePatch = "hpack";
   license = "unknown";
 }

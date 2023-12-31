@@ -1,2 +1,7 @@
 cradle:
-  stack:
+  cabal:
+    - path: "src"
+      component: "lib:matching-brackets"
+
+    - path: "test"
+      component: "matching-brackets:test:test"
