@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "rail-fence-cipher:lib"
+
+    - path: "./test"
+      component: "rail-fence-cipher:test:test"
