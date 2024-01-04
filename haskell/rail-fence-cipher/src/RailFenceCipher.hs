@@ -1,6 +1,6 @@
 module RailFenceCipher (encode, decode) where
 
-import Data.List
+import Data.List ( groupBy, sort, sortBy )
 import Data.Function (on)
 
 encode :: Int -> String -> String
@@ -18,9 +18,25 @@ insertAt 1 el (x:xs) = (el:x):xs
 insertAt n el (x:xs) = x : insertAt (n-1) el xs
 insertAt _ _ [] = []
 
+
 decode :: Int -> String -> String
-decode n xs = concat . foldr inserter start $ reseeded
-            where start =  replicate n []
-                  seeded = zip (sort . take (length xs) . genPos $ n) xs
-                  reseeded = concat . transpose . groupBy ((==) `on` fst) $ seeded
-                  inserter (pos, v) = insertAt pos v
+decode n xs = insertFrom (genPos n) letterList
+            where letterList = (map.map) snd . groupPos . seed n $ xs
+
+seed :: Int -> [b] -> [(Int, b)]
+seed i xs =  zip (sort . take (length xs) . genPos $ i) xs
+
+groupPos :: [(Int, b2)] -> [[(Int, b2)]]
+groupPos = groupBy ((==) `on` fst)
+
+finder :: Int -> [[a]] -> Maybe (a, [[a]])
+finder n = go n []
+      where go 1 acc ((f:fs):gs) = Just (f, reverse acc ++ fs : gs)
+            go v acc (fs:gs) = go (v-1) (fs:acc) gs
+            go _ _ [] =  Nothing
+
+insertFrom :: [Int] -> [[a]] -> [a]
+insertFrom [] _ = []
+insertFrom (n:ns) gs = case finder n gs of
+            Just (res, newlist) -> res : insertFrom ns newlist
+            Nothing -> []

@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "connect:lib"
+
+    - path: "./test"
+      component: "connect:test:test"
