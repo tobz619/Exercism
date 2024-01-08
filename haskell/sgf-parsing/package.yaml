@@ -5,6 +5,7 @@ dependencies:
   - base
   - containers
   - text
+  - parsec
 
 library:
   exposed-modules: Sgf
