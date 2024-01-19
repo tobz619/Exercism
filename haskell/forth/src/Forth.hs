@@ -10,7 +10,7 @@ module Forth
   ) where
 
 import Data.Text (Text, pack)
-import Control.Monad.State ( MonadState(get, put), State, gets )
+import Control.Monad.State ( MonadState(get, put), State, gets, modify' )
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.List.NonEmpty (nonEmpty, NonEmpty ((:|)))
@@ -20,6 +20,7 @@ import Text.Read (readMaybe)
 import Control.Monad.Except (ExceptT, MonadError (throwError))
 import qualified Data.Text as T
 import Text.Parsec.Char (space)
+import Data.Maybe (fromMaybe)
 
 data ForthError
      = DivisionByZero
@@ -96,32 +97,33 @@ stackOps = Map.fromList $
           ]
 
 
+
 lookupSt :: Text -> Evaluator ()
 lookupSt op = do fs <- get
                  let ops = env fs
-                 maybe (throwError $ UnknownWord op) return (Map.lookup op ops)
+                 fromMaybe (throwError $ UnknownWord op) (Map.lookup op ops)
 
 dup, drp, swap, over :: Evaluator ()
 dup = do sta <- gets stack
          case nonEmpty sta of
           Nothing -> throwError StackUnderflow
-          Just (x:| xs) -> gets $ put (\s -> s {stack = x : x : xs }) 
+          Just (x:| xs) -> modify' (\s -> s {stack = x : x : xs }) 
 
 drp = do sta <- gets stack
          case nonEmpty sta of
           Nothing -> throwError StackUnderflow
-          Just (_:| xs) -> gets $ put (\s -> s {stack = xs })
+          Just (_:| xs) -> modify' (\s -> s {stack = xs })
 
 swap = do sta <- gets stack
           case nonEmpty sta of
            Nothing -> throwError StackUnderflow
-           Just (x:| (y:xs)) -> gets $ put (\s -> s {stack = y : x : xs })
+           Just (x:| (y:xs)) -> modify' (\s -> s {stack = y : x : xs })
            Just _ -> throwError StackUnderflow
 
 over = do sta <- gets stack
           case nonEmpty sta of
            Nothing -> throwError StackUnderflow
-           Just (x:| (y : xs)) -> gets $ put (\s -> s {stack = y : x : y : xs })
+           Just (x:| (y : xs)) -> modify' (\s -> s {stack = y : x : y : xs })
            Just _ -> throwError StackUnderflow
 
 parseAssignment :: Parser (Text, [Text])
