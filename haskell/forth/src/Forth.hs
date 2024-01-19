@@ -10,15 +10,16 @@ module Forth
   ) where
 
 import Data.Text (Text, pack)
-import Control.Monad.State 
+import Control.Monad.State ( MonadState(get, put), State )
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.List.NonEmpty (nonEmpty, NonEmpty ((:|)))
-import Text.Parsec ( char, digit, letter, spaces, many, Parsec )
+import Text.Parsec ( char, digit, letter, spaces, many, sepBy, eof, alphaNum)
 import Text.Parsec.Text (Parser)
-import Data.Void (Void)
 import Text.Read (readMaybe)
-import Control.Exception.Base
+import Control.Monad.Except (ExceptT, MonadError (throwError))
+import qualified Data.Text as T
+import Text.Parsec.Char (space)
 
 data ForthError
      = DivisionByZero
@@ -27,64 +28,95 @@ data ForthError
      | UnknownWord Text
      deriving (Show, Eq)
 
-data ForthState = ForthState { stack :: Stack, env :: Map Text Op }
+data Operation = PLUS | MINUS | MULT | DIV
+  deriving (Show, Eq)
+
+data ForthState = ForthState { stack :: !Stack, env :: !(Map Text Op) }
 type Stack = [Int]
 type Op = Stack -> Either ForthError Stack
+
+type Evaluator = ExceptT ForthError (State ForthState)
 
 emptyState :: ForthState
 emptyState = ForthState [] stackOps
 
 evalText :: Text -> ForthState -> Either ForthError ForthState
-evalText text stack = error "You need to implement this function."
+evalText text fs = error "You need to implement this function."
 
 toList :: ForthState -> [Int]
 toList = stack
 
 
-push :: Int -> State ForthState ()
+push :: Int -> Evaluator ()
 push x = do fs <- get
             let newStack = x : stack fs
             put $ fs {stack = newStack}
 
-pop :: State ForthState (Either ForthError Int)
+pop :: Evaluator Int
 pop = do fs <- get
-         let list = nonEmpty . stack $ fs 
+         let list = nonEmpty . stack $ fs
          case list of
-            Nothing -> return $ Left StackUnderflow
+            Nothing -> throwError StackUnderflow
             Just (x :| xs) -> do put $ fs { stack = xs }
-                                 return $ Right x
+                                 return x
 
 
-applyBinOp :: (Int -> Int -> r) -> State ForthState (Either ForthError r)
+applyBinOp :: (Int -> Int -> Either ForthError Int) -> Evaluator ()
 applyBinOp op = do x <- pop
                    y <- pop
-                   let !v = liftM2 op x y
-                   return v
+                   case op x y of
+                    Right res -> do push res
+                    Left err -> throwError err
 
+applyStackOp :: (Stack -> Either ForthError Stack) -> Evaluator ()
+applyStackOp op = do fs <- get
+                     let sta = stack fs 
+                     case op sta of
+                      Left err -> throwError err
+                      Right st -> put $ fs {stack = st}
 
-binops :: Map Char (Int -> Int -> Int)
-binops = Map.fromList $ 
-        [ ('+', (+) )
-         , ('-', (-) )
-         , ('/', div )
-         , ('*', (*) )
-         ]
+runCommand :: Text -> Evaluator ()
+runCommand text = do fs <- get
+                     let ops = env fs
+                     case Map.lookup (T.toLower text) ops of
+                      Nothing -> throwError (UnknownWord text)
+                      Just x -> applyStackOp x
 
+opHandler :: Integral a => Operation -> a -> a -> Either ForthError a
+opHandler PLUS x y = return (x + y)
+opHandler MINUS x y = return (x - y)
+opHandler DIV _ 0 = Left DivisionByZero
+opHandler DIV x y = return (x `div` y)
+opHandler MULT x y= return (x * y)
+
+binops :: Map Char (Int -> Int -> Either ForthError Int)
+binops = Map.fromList $
+        [ ('+', opHandler PLUS )
+        , ('-', opHandler MINUS )
+        , ('/', opHandler DIV )
+        , ('*', opHandler MULT)
+        ]
 
 stackOps :: Map Text (Stack -> Either ForthError Stack)
-stackOps = Map.fromList $ 
+stackOps = Map.fromList $
           [ ("drop", drp)
           , ("dup", dup)
           , ("swap", swap)
           , ("over", over)
           ]
 
+
+lookupSt :: Text -> Evaluator Op
+lookupSt op = do fs <- get
+                 let ops = env fs
+                 maybe (throwError $ UnknownWord op) return (Map.lookup op ops)
+
 dup, drp, swap, over :: Stack -> Either ForthError Stack
 dup [] = Left StackUnderflow
 dup (x:xs) = Right (x:x:xs)
 
 drp [] = Left StackUnderflow
-drp (x:xs) = Right xs 
+drp (x:xs) = Right xs
 
 swap [] = Left StackUnderflow
 swap [x] = Left StackUnderflow
@@ -94,24 +126,13 @@ over [] = Left StackUnderflow
 over [x] = Left StackUnderflow
 over (x:y:ys) = Right (y:x:y:ys)
 
-parseAssignment :: Parser (Text, Text)
+parseAssignment :: Parser (Text, [Text])
 parseAssignment = do _ <- spaces *> char ':' <* spaces
                      name <- pack <$> many letter
                      _ <- spaces
-                     def <- pack <$> many letter
+                     def <- parseInp 
                      _ <- spaces *> char ';'
                      return (name, def)
 
-command :: Parser Text
-command = spaces *> (pack <$> many letter) <* spaces
-
-num :: Parser (Either ForthError Int)
-num = do _ <- spaces
-         mint <- many digit
-         return $ maybe 
-          (Left $ UnknownWord (pack mint)) 
-          Right 
-          (readMaybe . show $ mint :: Maybe Int)
-
-divZero DivideByZero = Left DivisionByZero
-divZero _ = undefined
+parseInp :: Parser [Text]
+parseInp = ((pack <$> many alphaNum) `sepBy` space) <* eof
