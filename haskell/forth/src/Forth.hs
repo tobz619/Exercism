@@ -10,7 +10,7 @@ module Forth
   ) where
 
 import Data.Text (Text, pack)
-import Control.Monad.State ( MonadState(get, put), State )
+import Control.Monad.State ( MonadState(get, put), State, gets )
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.List.NonEmpty (nonEmpty, NonEmpty ((:|)))
@@ -31,7 +31,7 @@ data ForthError
 data Operation = PLUS | MINUS | MULT | DIV
   deriving (Show, Eq)
 
-data ForthState = ForthState { stack :: !Stack, env :: !(Map Text Op) }
+data ForthState = ForthState { stack :: !Stack, env :: !(Map Text (Evaluator ())) }
 type Stack = [Int]
 type Op = Stack -> Either ForthError Stack
 
@@ -60,7 +60,6 @@ pop = do fs <- get
             Just (x :| xs) -> do put $ fs { stack = xs }
                                  return x
 
-
 applyBinOp :: (Int -> Int -> Either ForthError Int) -> Evaluator ()
 applyBinOp op = do x <- pop
                    y <- pop
@@ -75,56 +74,55 @@ applyStackOp op = do fs <- get
                       Left err -> throwError err
                       Right st -> put $ fs {stack = st}
 
-runCommand :: Text -> Evaluator ()
-runCommand text = do fs <- get
-                     let ops = env fs
-                     case Map.lookup (T.toLower text) ops of
-                      Nothing -> throwError (UnknownWord text)
-                      Just x -> applyStackOp x
 
-opHandler :: Integral a => Operation -> a -> a -> Either ForthError a
-opHandler PLUS x y = return (x + y)
-opHandler MINUS x y = return (x - y)
-opHandler DIV _ 0 = Left DivisionByZero
-opHandler DIV x y = return (x `div` y)
-opHandler MULT x y= return (x * y)
+opHandler :: Operation -> Evaluator ()
+opHandler PLUS = do x <- pop; y <- pop; push (x+y)
+opHandler MINUS = do x <- pop; y <- pop; push (x-y)
+opHandler MULT = do x <- pop; y <- pop; push (x*y)
+opHandler DIV = do x <- pop; y <- pop; if y == 0 then throwError DivisionByZero else push (x `div` y)
 
-binops :: Map Char (Int -> Int -> Either ForthError Int)
-binops = Map.fromList $
-        [ ('+', opHandler PLUS )
-        , ('-', opHandler MINUS )
-        , ('/', opHandler DIV )
-        , ('*', opHandler MULT)
-        ]
 
-stackOps :: Map Text (Stack -> Either ForthError Stack)
+
+stackOps :: Map Text (Evaluator ())
 stackOps = Map.fromList $
           [ ("drop", drp)
           , ("dup", dup)
           , ("swap", swap)
           , ("over", over)
+          , ("+", opHandler PLUS)
+          , ("-", opHandler MINUS)
+          , ("*", opHandler MULT)
+          , ("/", opHandler DIV)
           ]
 
 
-lookupSt :: Text -> Evaluator Op
+lookupSt :: Text -> Evaluator ()
 lookupSt op = do fs <- get
                  let ops = env fs
                  maybe (throwError $ UnknownWord op) return (Map.lookup op ops)
 
-dup, drp, swap, over :: Stack -> Either ForthError Stack
-dup [] = Left StackUnderflow
-dup (x:xs) = Right (x:x:xs)
+dup, drp, swap, over :: Evaluator ()
+dup = do sta <- gets stack
+         case nonEmpty sta of
+          Nothing -> throwError StackUnderflow
+          Just (x:| xs) -> gets $ put (\s -> s {stack = x : x : xs }) 
 
-drp [] = Left StackUnderflow
-drp (x:xs) = Right xs
+drp = do sta <- gets stack
+         case nonEmpty sta of
+          Nothing -> throwError StackUnderflow
+          Just (_:| xs) -> gets $ put (\s -> s {stack = xs })
 
-swap [] = Left StackUnderflow
-swap [x] = Left StackUnderflow
-swap(x:y:xs) = Right (y:x:xs)
+swap = do sta <- gets stack
+          case nonEmpty sta of
+           Nothing -> throwError StackUnderflow
+           Just (x:| (y:xs)) -> gets $ put (\s -> s {stack = y : x : xs })
+           Just _ -> throwError StackUnderflow
 
-over [] = Left StackUnderflow
-over [x] = Left StackUnderflow
-over (x:y:ys) = Right (y:x:y:ys)
+over = do sta <- gets stack
+          case nonEmpty sta of
+           Nothing -> throwError StackUnderflow
+           Just (x:| (y : xs)) -> gets $ put (\s -> s {stack = y : x : y : xs })
+           Just _ -> throwError StackUnderflow
 
 parseAssignment :: Parser (Text, [Text])
 parseAssignment = do _ <- spaces *> char ':' <* spaces
