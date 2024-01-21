@@ -7,7 +7,7 @@ import Test.Hspec.Runner (configFailFast, defaultConfig, hspecWith)
 import Forth (ForthError(..), emptyState, evalText, toList)
 
 main :: IO ()
-main = hspecWith defaultConfig {configFailFast = False} specs
+main = hspecWith defaultConfig {configFailFast = True} specs
 
 specs :: Spec
 specs = do
