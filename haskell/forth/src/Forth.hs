@@ -10,18 +10,16 @@ module Forth
   ) where
 
 import Data.Text (Text, pack)
-import Control.Monad.State.Strict ( MonadState(get, put), State, gets, modify', execState, evalState, StateT (runStateT), execStateT, evalStateT )
+import Control.Monad.State.Strict ( MonadState(get), gets, modify', StateT (runStateT), execStateT, evalStateT )
 import Data.Map (Map)
 import qualified Data.Map.Strict as Map
 import Data.List.NonEmpty (nonEmpty, NonEmpty ((:|)))
-import Text.Parsec ( char, digit, letter, spaces, many, sepBy, eof, alphaNum, parse, oneOf, (<|>), many1, manyTill, sepBy1)
+import Text.Parsec ( char, letter, spaces, eof, alphaNum, parse, oneOf, (<|>), many1, manyTill, sepBy1)
 import Text.Parsec.Text (Parser)
 import Text.Read (readMaybe)
 import qualified Data.Text as T
 import Text.Parsec.Char (space)
-import Control.Monad (foldM, void)
-import Data.List (foldl')
-import Data.Either (fromRight)
+import Control.Monad (foldM)
 import Control.Monad.Except (MonadError(throwError) )
 import Data.Maybe (fromMaybe)
 
@@ -43,12 +41,6 @@ type EnvEval = ForthState -> Either ForthError ForthState
 emptyState :: ForthState
 emptyState = ForthState [] defaultEnv
 
-
--- >>> toList <$> evalText ": dup-twice dup dup ;" emptyState
--- Right []
---
--- >>> toList <$> (evalText "3 5 7" emptyState >>= evalText "+")
--- ProgressCancelledException
 evalText :: Text -> EnvEval
 evalText text fs = case parse parseRegular "" (T.toLower text) of
                       Right ts -> mkEval fs ts
@@ -57,8 +49,6 @@ evalText text fs = case parse parseRegular "" (T.toLower text) of
                         Left _ -> Left InvalidWord
                         Right (name, def) -> let newEnv = handleCommand name def (env fs)
                                               in Right $ fs {env = newEnv}
-
-
 
 toList :: ForthState -> [Int]
 toList = reverse . stack
@@ -117,10 +107,9 @@ evalWord :: Ord k => k -> Map k [k] -> [k]
 evalWord w envi = fromMaybe [w] (Map.lookup w envi)
 
 mkEval :: ForthState -> [Text] -> Either ForthError ForthState
-mkEval fs = foldl' stateMaker (pure fs)
+mkEval fs = foldM stateMaker fs
         where stateMaker state text = let commands = evalWord text (env fs)
-                                       in foldl' eval state commands 
-                                          where eval sta com = sta >>= evalInp com
+                                       in foldM (flip evalInp) state commands 
 
 dup, drp, swap, over :: EnvEval
 dup = evalStateT $
@@ -159,24 +148,5 @@ parseAssignment = do _ <- spaces *> char ':' <* spaces
 parseInp :: Parser Text
 parseInp = pack <$> (spaces *> many1 (alphaNum <|> oneOf "+/*-") <* spaces)
 
-
--- >>> parse parseRegular "" "+ - +"
--- Right ["+","-","+"]
 parseRegular :: Parser [Text]
 parseRegular = fmap pack <$> (many1 (alphaNum <|> oneOf "+/*-") `sepBy1` space)
-
-
--- >>> runTexts ["1 2 3 4", "+"]
--- Right [1,2,7]
-
--- >>> runTexts [": foo dup ;", ": foo dup dup ;", "1 foo"]
--- Right [1,1,1]
-
--- >>> runTexts [ ": foo 5 ;" , ": bar foo ;" , ": foo 6 ;", "bar foo" ] -- => Right [5,6]
--- Right [5,6]
-
--- >>> runTexts [": swap dup dup ;","1 2 swap"]
--- Right [1,2,2,2]
-
-runTexts :: [Text] -> Either ForthError [Int]
-runTexts = fmap toList . foldM (flip evalText) emptyState
