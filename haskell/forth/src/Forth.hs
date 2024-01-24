@@ -17,12 +17,13 @@ import Data.List.NonEmpty (nonEmpty, NonEmpty ((:|)))
 import Text.Parsec ( char, digit, letter, spaces, many, sepBy, eof, alphaNum, parse, oneOf, (<|>), many1, manyTill, sepBy1)
 import Text.Parsec.Text (Parser)
 import Text.Read (readMaybe)
-import Control.Monad.Except (ExceptT, MonadError (throwError), runExceptT, liftEither, Except, runExcept)
 import qualified Data.Text as T
 import Text.Parsec.Char (space)
-import Control.Monad (foldM)
+import Control.Monad (foldM, void)
 import Data.List (foldl')
 import Data.Either (fromRight)
+import Control.Monad.Except (MonadError(throwError) )
+import Data.Maybe (fromMaybe)
 
 data ForthError
      = DivisionByZero
@@ -34,7 +35,7 @@ data ForthError
 data Operation = PLUS | MINUS | MULT | DIV
   deriving (Show, Eq)
 
-data ForthState = ForthState { stack :: !Stack, env :: Map Text EnvEval }
+data ForthState = ForthState { stack :: !Stack, env :: Map Text [Text] }
 type Stack = [Int]
 
 type EnvEval = ForthState -> Either ForthError ForthState
@@ -47,18 +48,32 @@ emptyState = ForthState [] defaultEnv
 -- Right []
 --
 -- >>> toList <$> (evalText "3 5 7" emptyState >>= evalText "+")
--- Right [3,12]
+-- ProgressCancelledException
 evalText :: Text -> EnvEval
-evalText text fs = case parse parseAssignment "" text of
-                    Right (name, d) -> assignCommand name d fs
-                    
-                    Left _ -> case parse parseRegular "" text of
-                                Left _ -> Left InvalidWord
-                                Right d -> mkState fs d
+evalText text fs = case parse parseRegular "" (T.toLower text) of
+                      Right ts -> mkEval fs ts
+                      Left _ -> case parse parseAssignment "" (T.toLower text) of
+
+                        Left _ -> Left InvalidWord
+                        Right (name, def) -> let newEnv = handleCommand name def (env fs)
+                                              in Right $ fs {env = newEnv}
+
 
 
 toList :: ForthState -> [Int]
 toList = reverse . stack
+
+defaultEnv :: Map Text [Text]
+defaultEnv = Map.fromList
+          [ ("drop", ["drop"])
+          , ("dup", ["dup"])
+          , ("swap", ["swap"])
+          , ("over", ["over"])
+          , ("+", ["+"])
+          , ("-", ["-"])
+          , ("*", ["*"])
+          , ("/", ["/"])
+          ]
 
 push :: Int -> StateT ForthState (Either ForthError) ForthState
 push x = do curStack <- gets stack
@@ -73,26 +88,52 @@ pop = do curStack <- gets stack
             Just (x :| xs) -> do modify' (\s -> s { stack = xs })
                                  return x
 
+
 opHandler :: Operation -> EnvEval
 opHandler PLUS = evalStateT $ do x <- pop; y <- pop; push (x+y)
 opHandler MINUS = evalStateT $ do x <- pop; y <- pop; push (y-x)
 opHandler MULT = evalStateT $ do x <- pop; y <- pop; push (x*y)
 opHandler DIV = evalStateT $ do x <- pop; y <- pop; if x == 0 then throwError DivisionByZero else push (y `div` x)
 
+evalInp :: Text -> ForthState -> Either ForthError ForthState
+evalInp "+" = opHandler PLUS
+evalInp "-" = opHandler MINUS
+evalInp "*" = opHandler MULT
+evalInp "/" = opHandler DIV
+evalInp "drop" = drp
+evalInp "dup" = dup
+evalInp "swap" = swap
+evalInp "over" = over
+evalInp x = case readMaybe . T.unpack $ x :: Maybe Int of
+              Just i -> execStateT (push i)
+              _ -> \fs -> maybe (Left $ UnknownWord x) (mkEval fs) (Map.lookup x (env fs))
+
+handleCommand :: Text -> [Text] -> Map Text [Text] -> Map Text [Text]
+handleCommand name newDef curEnv = Map.insert name body curEnv
+              where body = concatMap (`evalWord` curEnv) newDef
+
+
+evalWord :: Ord k => k -> Map k [k] -> [k]
+evalWord w envi = fromMaybe [w] (Map.lookup w envi)
+
+mkEval :: ForthState -> [Text] -> Either ForthError ForthState
+mkEval fs = foldl' stateMaker (pure fs)
+        where stateMaker state text = let commands = evalWord text (env fs)
+                                       in foldl' eval state commands 
+                                          where eval sta com = sta >>= evalInp com
+
 dup, drp, swap, over :: EnvEval
 dup = evalStateT $
       do sta <- gets stack
          case nonEmpty sta of
           Nothing -> throwError StackUnderflow
-          Just (x:| xs) -> do modify' (\s -> s {stack = x : x : xs })
-                              get
+          Just (x:| _) -> push x
 
 drp = evalStateT $
       do sta <- gets stack
          case nonEmpty sta of
           Nothing -> throwError StackUnderflow
-          Just (_:| xs) -> do modify' (\s -> s {stack = xs })
-                              get
+          Just _ -> pop >> get
 
 swap = evalStateT $
        do sta <- gets stack
@@ -108,18 +149,6 @@ over = evalStateT $
            Just (x:| (y : xs)) -> do modify' (\s -> s {stack = y : x : y : xs }) >> get
            Just _ -> throwError StackUnderflow
 
-
-defaultEnv :: Map Text EnvEval
-defaultEnv = Map.fromList
-          [ ("drop", drp)
-          , ("dup", dup)
-          , ("swap", swap)
-          , ("over", over)
-          , ("+", opHandler PLUS)
-          , ("-", opHandler MINUS)
-          , ("*", opHandler MULT)
-          , ("/", opHandler DIV)
-          ]
 
 parseAssignment :: Parser (Text, [Text])
 parseAssignment = do _ <- spaces *> char ':' <* spaces
@@ -137,31 +166,6 @@ parseRegular :: Parser [Text]
 parseRegular = fmap pack <$> (many1 (alphaNum <|> oneOf "+/*-") `sepBy1` space)
 
 
-applyForthFunc :: Text -> ForthState -> Either ForthError ForthState
-applyForthFunc name fs = case Map.lookup name curEnv of
-                          Nothing -> Left $ UnknownWord name
-                          Just f -> f fs
-                      where curEnv = env fs
-
-evalInp :: Text -> EnvEval
-evalInp t fs = case readMaybe . T.unpack $ t :: Maybe Int of
-              Just i ->  evalStateT (push i) fs
-              Nothing -> applyForthFunc t fs
-
-
-assignCommand :: Text -> [Text] -> EnvEval
-assignCommand name newDef fs = case Map.lookup name (env fs) of
-                                    Nothing -> let newEnv = Map.insert name (`mkState` newDef) (env fs)
-                                                in return $ fs {env = newEnv}
-                                    
-                                    Just f ->  let newEnv = Map.insert name (`mkState` newDef) (fromRight (env fs) (env <$> f fs))
-                                                in return $ fs {env = newEnv}
-
-mkState :: ForthState -> [Text] -> Either ForthError ForthState
-mkState fs = foldl' stateMaker (pure fs)
-        where stateMaker state text = state >>= \s -> evalInp text s
-
-
 -- >>> runTexts ["1 2 3 4", "+"]
 -- Right [1,2,7]
 
@@ -169,6 +173,10 @@ mkState fs = foldl' stateMaker (pure fs)
 -- Right [1,1,1]
 
 -- >>> runTexts [ ": foo 5 ;" , ": bar foo ;" , ": foo 6 ;", "bar foo" ] -- => Right [5,6]
--- Right [6,6]
+-- Right [5,6]
+
+-- >>> runTexts [": swap dup dup ;","1 2 swap"]
+-- Right [1,2,2,2]
+
 runTexts :: [Text] -> Either ForthError [Int]
 runTexts = fmap toList . foldM (flip evalText) emptyState
