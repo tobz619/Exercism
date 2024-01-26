@@ -23,16 +23,6 @@ parseSgf sgf =
                 Left _ -> Nothing
                 Right vs -> Just vs
 
-
-testInp1 :: Text
-testInp1 = "(;A[\\]b\nc\\\nd\t\te\\\\ \\\n\\]])"
-
-testInp2 :: Text
-testInp2 = "(;FF[4](;B[aa];W[ab])(;B[dd];W[ee]))"
-
-testInp3 :: Text
-testInp3 = "(;A[hello\\\tworld])"
-
 treeParser :: SGFParser SgfTree
 treeParser = brackets variationParser
 
