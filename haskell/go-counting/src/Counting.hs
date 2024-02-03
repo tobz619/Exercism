@@ -40,25 +40,10 @@ mkBoard xs = Map.fromList $! go (1,1) (unlines xs) []
               go (r,c) ('W':ys) acc = ((r,c), White) : go (r,c+1) ys acc
               go (r,c) (_:ys) acc = ((r,c), Empty) : go (r,c+1) ys acc
 
-board5x5 =  [ "  B  "
-            , " B B "
-            , "B W B"
-            , " W W "
-            , "  W  " ]
-
-example :: Board
-example = mkBoard board5x5
-
-
-example2 :: Board
-example2 = mkBoard ["BB ", "BBB", "WWW"]
-
 eligibleNeighbours :: Coord -> Board -> [Coord]
-eligibleNeighbours c b = mapMaybe checkColour (neighbours c)
+eligibleNeighbours start b = mapMaybe checkColour (neighbours start)
                   where checkColour co = co <$ Map.lookup co b
-
-neighbours :: Coord -> [Coord]
-neighbours (r,c) = [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]
+                        neighbours (r,c) = [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]
 
 
 getColour :: Board -> Set Coord -> Maybe Color
@@ -75,8 +60,6 @@ getColour b grp
 
                in S.map (`Map.lookup` b) allNeighbours
                
--- >>> expandGroups example2
--- [fromList [(1,3)]]
 expandGroups :: Board -> [Set Coord]
 expandGroups board = go empties
         where empties = Map.filter (== Empty) board
