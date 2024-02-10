@@ -5,7 +5,7 @@ module Counting (
 ) where
 
 {-
-Stole
+Stolen from tobeannouncd, using it as a learning opportunity
 -}
 
 import Data.Set (Set)

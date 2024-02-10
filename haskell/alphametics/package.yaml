@@ -10,7 +10,8 @@ library:
   ghc-options: -Wall
   dependencies:
    - megaparsec       # List here the packages you
-   - containers       # want to use in your solution.
+   - containers
+   - mtl       # want to use in your solution.
 
 tests:
   test:
