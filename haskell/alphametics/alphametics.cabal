@@ -10,8 +10,10 @@ build-type:     Simple
 
 library
   exposed-modules:
-      Alphametics
+      Alphametics, Alphametics2
   other-modules:
+      Alphametics
+      Alphametics2
       Paths_alphametics
   hs-source-dirs:
       src
