@@ -95,16 +95,21 @@ testInp2 = loop addChars cols chrs mp
     where mp = initChars "HESEESTHELIGHT"
           (cols, chrs) = pairColumns ["HE","SEES","THE"] "LIGHT"
 
-isValidInp :: [String] -> String -> PossibleChars -> Bool
-isValidInp inpStrings resString charMap =
+validateAns :: [String] -> String -> PossibleChars -> Bool
+validateAns inpStrings resString charMap =
     let numString chars = concat <$> traverse (`Map.lookup` charMap) chars
         readNum nums = readMaybe $ map intToDigit nums :: Maybe Int
         inpStrNums = traverse numString inpStrings
         resStrNum = numString resString
-        resNum = resStrNum >>= readNum
-        inpNums = inpStrNums >>= traverse readNum
+        resNum = readNum =<< resStrNum 
+        inpNums = traverse readNum =<< inpStrNums 
 
 
      in fmap sum inpNums == resNum && ((head <$> resStrNum) /= Just 0)
 
-getValidInp strs res cands = Map.toList . Map.delete ' ' <$> find (isValidInp strs res) cands
+-- >>> getValidInp ["SEND","MORE"] "MONEY" testInp
+-- Just [('D',[7]),('E',[5]),('M',[1]),('N',[6]),('O',[0]),('R',[8]),('S',[9]),('Y',[2])]
+--
+-- >>> getValidInp ["HE","SEES","THE"] "LIGHT" testInp2
+-- Just [('E',[4]),('G',[2]),('H',[5]),('I',[0]),('L',[1]),('S',[9]),('T',[7])]
+getValidInp strs res cands = Map.toList . Map.delete ' ' <$> find (validateAns strs res) cands
