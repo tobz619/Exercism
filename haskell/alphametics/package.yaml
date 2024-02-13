@@ -5,7 +5,8 @@ dependencies:
   - base
 
 library:
-  exposed-modules: Alphametics, Alphametics2
+  exposed-modules: 
+   - Alphametics 
   source-dirs: src
   ghc-options: -Wall
   dependencies:
