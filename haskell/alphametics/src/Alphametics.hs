@@ -2,7 +2,7 @@
 module Alphametics (solve) where
 
 import qualified Data.Map as Map
-import Data.List ( delete, nub, transpose )
+import Data.List ( delete, nub, transpose, foldl')
 import Data.Char ( toUpper )
 import Data.Maybe (fromMaybe, mapMaybe, listToMaybe, catMaybes)
 import Control.Applicative (liftA2)
@@ -33,9 +33,8 @@ updateMap = foldr (uncurry setChar)
 
 
 checkNull :: (Int, PossibleChars) -> Maybe (Int, PossibleChars)
-checkNull (c,mp) = case Map.foldr (\x acc -> if null x then Nothing else acc) (Just mp) mp of 
-                    Nothing -> Nothing
-                    Just x -> Just (c, x)
+checkNull (c,mp) = (,) c <$> traverse (\x -> if null x then Nothing else Just x) mp
+
 
 addChars :: String -> Char -> Int -> Map.Map Char [Int] -> Maybe [(Int, PossibleChars)]
 addChars cs resChar carry charMap = do
@@ -43,16 +42,15 @@ addChars cs resChar carry charMap = do
     resVals <- resChar `Map.lookup` charMap
     let valCombi = sequence as
 
-    return [ ( c,  toReturn ) |
+    return [ ( c, toReturn ) |
         v1 <- valCombi,
         let (c, resDig) = (`divMod` 10) . (carry +) $ sum v1,
         resDig `elem` resVals,
         let !toReturn = updateMap charMap ((resChar,resDig): zip cs v1)
         ]
 
--- >>> processFun addChars "DE" 'Y' 0 (initChars "SENDMOREMONEY")
 
-processFun :: (String  -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]) 
+processFun :: (String  -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)])
             -> String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]
 processFun f str ch car charMap = let
         results = fromMaybe [] $ f str ch car charMap
@@ -60,9 +58,10 @@ processFun f str ch car charMap = let
 
 
 loop = go 0
-    where go carry f [s] [c] !charMap = snd <$> processFun f s c carry charMap
-          go carry f (s:strs) (c:chrs) !charMap = let
-            !carryRes = processFun f s c carry charMap
+    where go _ _ _ [] mp = pure mp
+          go carry f [] _ mp = pure mp
+          go carry f cols@(s:strs) res@(c:chrs) !charMap = let
+            !carryRes = (carry, cols,res, charMap) `traceShow` processFun f s c carry charMap
             in concatMap (\ ~(newCar, newMap) -> go newCar f strs chrs newMap) carryRes
 
 standardiseInps :: [String] -> String -> ([String], String)
@@ -77,19 +76,18 @@ standardiseInps inps res = (transpose lined, normaledRes)
 pairColumns :: [String] -> String -> ([String], [Char])
 pairColumns inps = unzip . uncurry zip . standardiseInps inps
 
-allUnique :: Eq a => [a] -> Bool
-allUnique [] = True
-allUnique (x:xs) = x `notElem` xs && allUnique xs
 
-
-initChars :: [Char] -> Map.Map Char [Int]
-initChars xs = Map.insert ' ' [0] $ foldr initiator Map.empty (nub xs :: String)
+initChars :: String -> Map.Map Char [Int]
+initChars xs = Map.insert ' ' [0] $ foldr initiator Map.empty (nub xs)
         where initiator x = Map.insert x [0..9]
 
--- >>> addChars "DE" 'Y' 0 (initChars "SENDMOREMONEY")
 
 -- >>> testInp 
--- [fromList [(' ',[0]),('D',[1]),('E',[5]),('M',[0]),('N',[3]),('O',[8]),('R',[2]),('S',[7]),('Y',[6])],fromList [(' ',[0]),('D',[1]),('E',[7]),('M',[0]),('N',[3]),('O',[6]),('R',[4]),('S',[5]),('Y',[8])],fromList [(' ',[0]),('D',[1]),('E',[8]),('M',[0]),('N',[2]),('O',[4]),('R',[6]),('S',[3]),('Y',[9])],fromList [(' ',[0]),('D',[1]),('E',[8]),('M',[0]),('N',[5]),('O',[7]),('R',[3]),('S',[6]),('Y',[9])],fromList [(' ',[0]),('D',[2]),('E',[4]),('M',[0]),('N',[3]),('O',[9]),('R',[1]),('S',[8]),('Y',[6])],fromList [(' ',[0]),('D',[2]),('E',[5]),('M',[0]),('N',[4]),('O',[9]),('R',[1]),('S',[8]),('Y',[7])],fromList [(' ',[0]),('D',[2]),('E',[7]),('M',[0]),('N',[1]),('O',[4]),('R',[6]),('S',[3]),('Y',[9])],fromList [(' ',[0]),('D',[2]),('E',[7]),('M',[0]),('N',[3]),('O',[6]),('R',[4]),('S',[5]),('Y',[9])],fromList [(' ',[0]),('D',[3]),('E',[6]),('M',[0]),('N',[4]),('O',[8]),('R',[2]),('S',[7]),('Y',[9])],fromList [(' ',[0]),('D',[3]),('E',[8]),('M',[0]),('N',[5]),('O',[7]),('R',[2]),('S',[6]),('Y',[1])],fromList [(' ',[0]),('D',[4]),('E',[3]),('M',[0]),('N',[2]),('O',[9]),('R',[1]),('S',[8]),('Y',[7])],fromList [(' ',[0]),('D',[4]),('E',[5]),('M',[0]),('N',[2]),('O',[7]),('R',[3]),('S',[6]),('Y',[9])],fromList [(' ',[0]),('D',[4]),('E',[5]),('M',[0]),('N',[3]),('O',[8]),('R',[2]),('S',[7]),('Y',[9])],fromList [(' ',[0]),('D',[5]),('E',[4]),('M',[0]),('N',[1]),('O',[7]),('R',[3]),('S',[6]),('Y',[9])],fromList [(' ',[0]),('D',[6]),('E',[3]),('M',[0]),('N',[1]),('O',[8]),('R',[2]),('S',[7]),('Y',[9])],fromList [(' ',[0]),('D',[7]),('E',[8]),('M',[0]),('N',[1]),('O',[3]),('R',[6]),('S',[2]),('Y',[5])],fromList [(' ',[0]),('D',[9]),('E',[4]),('M',[0]),('N',[1]),('O',[7]),('R',[2]),('S',[6]),('Y',[3])],fromList [(' ',[0]),('D',[9]),('E',[4]),('M',[0]),('N',[2]),('O',[8]),('R',[1]),('S',[7]),('Y',[3])],fromList [(' ',[0]),('D',[9]),('E',[5]),('M',[0]),('N',[3]),('O',[8]),('R',[1]),('S',[7]),('Y',[4])],fromList [(' ',[0]),('D',[9]),('E',[6]),('M',[0]),('N',[4]),('O',[8]),('R',[1]),('S',[7]),('Y',[5])],fromList [(' ',[0]),('D',[9]),('E',[7]),('M',[0]),('N',[1]),('O',[4]),('R',[5]),('S',[3]),('Y',[6])],fromList [(' ',[0]),('D',[9]),('E',[8]),('M',[0]),('N',[1]),('O',[3]),('R',[6]),('S',[2]),('Y',[7])],fromList [(' ',[0]),('D',[9]),('E',[8]),('M',[0]),('N',[2]),('O',[4]),('R',[5]),('S',[3]),('Y',[7])],fromList [(' ',[0]),('D',[9]),('E',[8]),('M',[0]),('N',[4]),('O',[6]),('R',[3]),('S',[5]),('Y',[7])]]
+-- []
 testInp = loop addChars cols chrs mp
     where mp = initChars "SENDMOREMONEY"
           (cols, chrs) = pairColumns ["SEND","MORE"] "MONEY"
+
+-- >>> testMap
+-- Just (fromList [(' ',[0]),('b',[0,1,2,3,4,6,7,8,9]),('i',[0,1,2,3,4,6,7,8,9]),('o',[0,1,2,3,4,6,7,8,9]),('t',[5])])
+testMap = traverse (\x -> if null x then Nothing else Just x) $ updateMap (initChars "tobi") [('t',5),('t',5)]
