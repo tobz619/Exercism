@@ -2,11 +2,12 @@
 module Alphametics (solve) where
 
 import qualified Data.Map as Map
-import Data.List ( delete, nub, transpose, foldl')
-import Data.Char ( toUpper )
+import Data.List ( delete, nub, transpose, foldl', find)
+import Data.Char ( toUpper, intToDigit )
 import Data.Maybe (fromMaybe, mapMaybe, listToMaybe, catMaybes)
 import Control.Applicative (liftA2)
 import Debug.Trace (traceShowId, traceShow)
+import Text.Read (readMaybe)
 
 
 type PossibleChars = Map.Map Char [Int]
@@ -24,7 +25,7 @@ solve puzzle = error "You need to implement this function."
 
 
 updateMap ::  PossibleChars -> [(Char, Int)] -> PossibleChars
-updateMap = foldr (uncurry setChar)
+updateMap = foldl' (\acc (c,i) -> setChar c i acc)
         where setChar ch v = Map.mapWithKey (selector ch)
                 where selector ' ' _ xs = xs
                       selector _ ' ' xs = xs
@@ -89,6 +90,21 @@ testInp = loop addChars cols chrs mp
     where mp = initChars "SENDMOREMONEY"
           (cols, chrs) = pairColumns ["SEND","MORE"] "MONEY"
 
--- >>> testMap
--- Just (fromList [(' ',[0]),('b',[0,1,2,3,4,6,7,8,9]),('i',[0,1,2,3,4,6,7,8,9]),('o',[0,1,2,3,4,6,7,8,9]),('t',[5])])
-testMap = traverse (\x -> if null x then Nothing else Just x) $ updateMap (initChars "tobi") [(' ',5),('t',5)]
+
+testInp2 = loop addChars cols chrs mp
+    where mp = initChars "HESEESTHELIGHT"
+          (cols, chrs) = pairColumns ["HE","SEES","THE"] "LIGHT"
+
+isValidInp :: [String] -> String -> PossibleChars -> Bool
+isValidInp inpStrings resString charMap =
+    let numString chars = concat <$> traverse (`Map.lookup` charMap) chars
+        readNum nums = readMaybe $ map intToDigit nums :: Maybe Int
+        inpStrNums = traverse numString inpStrings
+        resStrNum = numString resString
+        resNum = resStrNum >>= readNum
+        inpNums = inpStrNums >>= traverse readNum
+
+
+     in fmap sum inpNums == resNum && ((head <$> resStrNum) /= Just 0)
+
+getValidInp strs res cands = Map.toList . Map.delete ' ' <$> find (isValidInp strs res) cands
