@@ -20,6 +20,7 @@ pairs "farmer sowing his corn" = "kept"
 pairs "horse and the hound and the horn" = "belonged to"
 pairs _ = ""
 
+order :: [String]
 order = [ "house that Jack built", "malt", "rat", "cat", "dog", "cow with the crumpled horn"
         , "maiden all forlorn", "man all tattered and torn","priest all shaven and shorn"
         , "rooster that crowed in the morn", "farmer sowing his corn"
