@@ -3,15 +3,15 @@ module Alphametics (solve) where
 
 import qualified Data.Map as Map
 import Data.List ( delete, nub, transpose, foldl', find)
-import Data.Char ( toUpper, intToDigit, isAlpha )
+import Data.Char ( intToDigit, isAlpha )
 import Data.Maybe (fromMaybe, mapMaybe)
 import Text.Read (readMaybe)
 import Text.Megaparsec
-import Text.Megaparsec.Char
-import Data.Void
+    ( parse, many, (<|>), Parsec, MonadParsec(try) )
+import Text.Megaparsec.Char ( char, space, upperChar, string )
+import Data.Void ( Void )
 import Data.Monoid (Sum(Sum), Product (Product)) -- for the future
-import Control.Monad (filterM)
-import Debug.Trace
+import Debug.Trace ()
 
 
 mkSumMap :: Map.Map Char Integer -> Map.Map Char (Sum Integer)
@@ -39,7 +39,7 @@ solve puzzle = let res = mkValuePair puzzle
 
 setCharVariants :: Char -> PossibleChars -> Maybe [PossibleChars]
 setCharVariants c charMap = do lis <- Map.lookup c charMap
-                               return $! map (\i -> updateMap charMap [(c,i)]) lis
+                               return $! map (updateMap charMap c) lis
 
 
 setAllCharVariants :: String -> PossibleChars -> Maybe [PossibleChars]
@@ -48,19 +48,14 @@ setAllCharVariants inpString charMap = go inpString [charMap]
           go (s:str) charMapList  = traverse (setCharVariants s) charMapList >>= go str . concat
 
 
-
-updateMap ::  PossibleChars -> [(Char, Int)] -> PossibleChars
-updateMap = foldl' (\acc (c,i) -> setChar c i acc)
+updateMap :: PossibleChars -> Char -> Int -> PossibleChars
+updateMap mp c i = setChar c i mp
         where setChar ch v = Map.mapWithKey (selector ch)
                 where selector ' ' _ xs = xs
                       selector _ ' ' xs = xs
                       selector toChange key xs
                         | key == toChange = [v]
                         | otherwise = delete v xs
-
-checkNull :: (Int, PossibleChars) -> Maybe (Int, PossibleChars)
-checkNull (c,mp) = (,) c <$> traverse (\x -> if null x then Nothing else Just x) mp
-
 
 validAdd :: String -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]
 validAdd cs resChar carry charMap = do
@@ -71,7 +66,7 @@ validAdd cs resChar carry charMap = do
         v1 <- sequence as,
         let (c, resDig) = (`divMod` 10) . (carry +) $ sum v1,
         resDig `elem` resVals,
-        let toReturn = updateMap charMap [(resChar,resDig)]
+        let toReturn = updateMap charMap resChar resDig
         ]
 
 
@@ -84,6 +79,7 @@ processFun :: (String  -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleC
             -> String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]
 processFun f str ch car charMap = mapMaybe checkNull results
         where results = fromMaybe [] $ f str ch car charMap
+              checkNull (c,mp) = (,) c <$> traverse (\x -> if null x then Nothing else Just x) mp
 
 loop :: (String -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]) -> [String] -> [Char] -> PossibleChars -> [Map.Map Char [Int]]
 loop = go 0
@@ -124,16 +120,19 @@ validateAns inpStrings resString charMap =
      in fmap sum inpNums == resNum && noZeroLead ((:) <$> resStrNum <*> inpStrNums)
             where noZeroLead strs = all ((/= 0) . head) (fromMaybe [] strs)
 
--- >>> solve "A + A + A + A + A + A + A + A == BC"
--- ProgressCancelledException
+-- >>> solve "A + A + A + A + A + A + A + A + A + A + A + A == BCD"
+-- Just [('A',9),('B',1),('C',0),('D',8)]
 getValidInp :: [String] -> String -> [PossibleChars] -> Maybe [(Char, Int)]
 getValidInp strs res cands = Map.toList . Map.map head . Map.delete ' ' <$> find (validateAns strs res) cands
 
 addParse :: Parser Expr
 addParse = Expr Plus <$> valueParse <* (space *> char '+' <* space) <*> pExpr
 
+multParse :: Parser Expr
+multParse = Expr Plus <$> valueParse <* (space *> char '*' <* space) <*> pExpr
+
 pExpr :: Parser Expr
-pExpr = space *> (try addParse <|> valueParse) <* space
+pExpr = space *> (try addParse <|> try multParse <|> valueParse) <* space
 
 valueParse :: Parser Expr
 valueParse = Value <$> (space *> many upperChar)
@@ -160,8 +159,5 @@ mkValuePair s = case parse equationParse "" s of
 mkColumns :: String -> Maybe ([String], [Char])
 mkColumns = fmap (uncurry pairColumns). mkValuePair
 
--- >>> mkValuePair "A + A + A + A + A + A + A + A + A + A + A + B == BCC"
--- Just (["A","A","A","A","A","A","A","A","A","A","A","B"],"BCC")
 
--- >>> mkColumns "A + A + A + A + A + A + A + A + A + A + A + B == BCC"
--- Just (["AAAAAAAAAAAB","            ","            "],"CCB")
+stupidThing = "THIS + A + FIRE + THEREFORE + FOR + ALL + HISTORIES + I + TELL + A + TALE + THAT + FALSIFIES + ITS + TITLE + TIS + A + LIE + THE + TALE + OF + THE + LAST + FIRE + HORSES + LATE + AFTER + THE + FIRST + FATHERS + FORESEE + THE + HORRORS + THE + LAST + FREE + TROLL + TERRIFIES + THE + HORSES + OF + FIRE + THE + TROLL + RESTS + AT + THE + HOLE + OF + LOSSES + IT + IS + THERE + THAT + SHE + STORES + ROLES + OF + LEATHERS + AFTER + SHE + SATISFIES + HER + HATE + OFF + THOSE + FEARS + A + TASTE + RISES + AS + SHE + HEARS + THE + LEAST + FAR + HORSE + THOSE + FAST + HORSES + THAT + FIRST + HEAR + THE + TROLL + FLEE + OFF + TO + THE + FOREST + THE + HORSES + THAT + ALERTS + RAISE + THE + STARES + OF + THE + OTHERS + AS + THE + TROLL + ASSAILS + AT + THE + TOTAL + SHIFT + HER + TEETH + TEAR + HOOF + OFF + TORSO + AS + THE + LAST + HORSE + FORFEITS + ITS + LIFE + THE + FIRST + FATHERS + HEAR + OF + THE + HORRORS + THEIR + FEARS + THAT + THE + FIRES + FOR + THEIR + FEASTS + ARREST + AS + THE + FIRST + FATHERS + RESETTLE + THE + LAST + OF + THE + FIRE + HORSES + THE + LAST + TROLL + HARASSES + THE + FOREST + HEART + FREE + AT + LAST + OF + THE + LAST + TROLL + ALL + OFFER + THEIR + FIRE + HEAT + TO + THE + ASSISTERS + FAR + OFF + THE + TROLL + FASTS + ITS + LIFE + SHORTER + AS + STARS + RISE + THE + HORSES + REST + SAFE + AFTER + ALL + SHARE + HOT + FISH + AS + THEIR + AFFILIATES + TAILOR + A + ROOFS + FOR + THEIR + SAFE == FORTRESSES"
