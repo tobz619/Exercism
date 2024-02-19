@@ -78,6 +78,7 @@ testCombinations e ls = find (testCombination e) combinations
     where combinations = map combination $ generateCombinations (length ls)
           combination c = zip ls c
 
+
 generateCombinations :: Int -> [[Int]]
 generateCombinations l = genRec l [0..9] []
     where genRec :: Int -> [Int] -> [Int] -> [[Int]]
