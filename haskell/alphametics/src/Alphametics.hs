@@ -1,7 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 module Alphametics (solve) where
 
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Data.List ( delete, nub, transpose, foldl', find)
 import Data.Char ( intToDigit, isAlpha )
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList, listToMaybe)
@@ -43,7 +43,7 @@ setCharVariants c charMap = do lis <- Map.lookup c charMap
 
 
 setAllCharVariants :: String -> PossibleChars -> Maybe [PossibleChars]
-setAllCharVariants inpString charMap = go inpString [charMap]
+setAllCharVariants inpString !charMap = go inpString [charMap]
     where go "" charMapList   = pure charMapList
           go (s:str) charMapList  = traverse (setCharVariants s) charMapList >>= go str . concat
 

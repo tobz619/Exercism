@@ -4,15 +4,13 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, containers, hspec, lib, mtl, parsec
-      , text
-      }:
+  f = { mkDerivation, base, hspec, lib }:
       mkDerivation {
-        pname = "forth";
-        version = "1.7.1.13";
+        pname = "darts";
+        version = "1.0.0.0";
         src = ./.;
-        libraryHaskellDepends = [ base containers mtl parsec text ];
-        testHaskellDepends = [ base containers hspec mtl parsec text ];
+        libraryHaskellDepends = [ base ];
+        testHaskellDepends = [ base hspec ];
         license = "unknown";
       };
 
