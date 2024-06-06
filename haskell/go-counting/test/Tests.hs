@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 import Counting (Color(Black,White), territories, territoryFor)
 
 main :: IO ()
-main = hspecWith defaultConfig {configFailFast = True} specs
+main = hspecWith defaultConfig {configFailFast = False} specs
 
 specs :: Spec
 specs = do

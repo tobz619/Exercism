@@ -10,7 +10,7 @@ import qualified Data.Set as Set
 import Data.Sequence(Seq, ViewL(..))
 import qualified Data.Sequence as Seq
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Maybe (fromMaybe, mapMaybe, isNothing)
 import Control.Monad.State
 import Control.Monad.Reader
 import Debug.Trace
@@ -30,29 +30,30 @@ newBFS = BFS Seq.empty Set.empty Set.empty
 type Board = Map.Map Coord (Maybe Color)
 
 territories :: [String] -> [(Set Coord, Maybe Color)]
-territories board = Set.toList $ Set.fromList $ mapMaybe (territoryFor board) (Map.keys . Map.filter (== Nothing) $ mkBoard board)
+territories board = Set.toList $ Set.fromList $ mapMaybe (territoryFor board) (Map.keys . Map.filter isNothing $ mkBoard board)
 
 territoryFor :: [String] -> Coord -> Maybe (Set Coord, Maybe Color)
-territoryFor board co = do _ <- Map.lookup co (mkBoard board) 
-                           return $ evalState (territorySearch (mkBoard board) co) newBFS
+territoryFor board co = do c <- Map.lookup co (mkBoard board)
+                           case c of
+                             Nothing -> return $ evalState (territorySearch (mkBoard board) co) newBFS
+                             _ -> Nothing
 
 neighbourCoords :: Coord -> [Coord]
-neighbourCoords (r,c) = [(x,y) | x <- [r-1, r+1], y<- [c-1, c+1] , (x,y) /= (r,c)]
+neighbourCoords (x,y) = [(x,y) | x' <- [x-1 .. x+1], y'<- [y-1 .. y+1] , (x,y) /= (x',y')]
 
-territoryNeighbourCoords :: Coord -> [Coord]
-territoryNeighbourCoords (r,c) = [(r, c-1), (r, c+1), (r+1, c), (r-1, c)]
+libertyCoords :: Coord -> [Coord]
+libertyCoords (x,y) = [(x, y-1), (x, y+1), (x+1, y), (x-1, y)]
 
-filterSameColourNeighbours :: (Coord -> [Coord]) -> Board -> Coord -> Maybe [Coord]
-filterSameColourNeighbours neighfn board co = do col <- Map.lookup co board
-                                                 let neighbours = neighfn co
-                                                 return $ [ coor | coor <- neighbours, Just col == Map.lookup coor board]
+growEmpty :: (Coord -> [Coord]) -> Board -> Coord -> [Coord]
+growEmpty neighfn board co = [coords | coords <- neighfn co, Just Nothing == Map.lookup coords board]
+
 mkBoard :: [String] -> Board
 mkBoard xs = Map.fromList $! go (1,1) (unlines xs) []
         where go _ [] _ = []
-              go (r,_) ('\n':rest) acc = go (r+1, 1) rest acc
-              go (r,c) ('B':ys) acc = ((r,c), Just Black) : go (r,c+1) ys acc
-              go (r,c) ('W':ys) acc = ((r,c), Just White) : go (r,c+1) ys acc
-              go (r,c) (_:ys) acc = ((r,c), Nothing) : go (r,c+1) ys acc
+              go (_,y) ('\n':rest) acc = go (1,y+1) rest acc
+              go (x,y) ('B':ys) acc = ((x,y), Just Black) : go (x+1,y) ys acc
+              go (x,y) ('W':ys) acc = ((x,y), Just White) : go (x+1,y) ys acc
+              go (x,y) (_:ys) acc = ((x,y), Nothing) : go (x+1, y) ys acc
 
 newBFSearch :: Coord -> State BFS ()
 newBFSearch co = modify (\bfs -> bfs { queue = searchFrom })
@@ -73,19 +74,19 @@ addToConnected co = asks $ Set.insert co
 
 extendQueue :: Foldable t => (Coord -> [Coord]) -> Board -> t Coord -> Coord -> Reader (Seq Coord) (Seq Coord)
 extendQueue neighfn board seenList co = do
-    let neighbours = Set.fromList $ fromMaybe [] $ filterSameColourNeighbours neighfn board co
+    let neighbours = Set.fromList $ growEmpty neighfn board co
         unseen =  Set.filter (`notElem` seenList) neighbours
         newQueue que = Set.foldl' (Seq.|>) que unseen
     asks newQueue
 
 capturedRegion :: Board -> Set Coord -> Maybe Color
 capturedRegion board regionCoords  = let
-    neighbourCols = Set.fromList $ mapMaybe (`Map.lookup` board) (concatMap neighbourCoords regionCoords)
+    neighbourCols =  mapMaybe (`Map.lookup` board) (concatMap libertyCoords regionCoords)
     in eval neighbourCols
         where eval s
-                | (Just Black `elem` s) == (Just White `notElem` s) = Just Black
-                | (Just White `elem` s) == (Just Black `notElem` s) = Just White
-                | otherwise = Nothing 
+                | (Just Black `elem` s) && (Just White `notElem` s) = Just Black
+                | (Just White `elem` s) && (Just Black `notElem` s) = Just White
+                | otherwise = Nothing
 
 continueBFS :: Board -> State BFS (Set Coord, Maybe Color)
 continueBFS board = do
@@ -111,7 +112,7 @@ territoryBFS board = do
     case res of
         Nothing -> return (c, capturedRegion board c)
         Just co -> do let newSeen = runReader (addToSeen co) viewed
-                          moreQueue = runReader (extendQueue territoryNeighbourCoords board viewed co) newQueue
+                          moreQueue = runReader (extendQueue libertyCoords board viewed co) newQueue
                           newConnected = runReader (addToConnected co) c
                       put $ BFS moreQueue newSeen newConnected
                       territoryBFS board
@@ -125,18 +126,14 @@ connectedSearch board co = do newBFSearch co
                               continueBFS board
 
 board5x5 :: [String]
-board5x5 = [ "  B  "
+board5x5 =  [ "  B  "
             , " B B "
             , "B W B"
             , " W W "
             , "  W  " ]
 
 board5x5B :: Board
-board5x5B = mkBoard  [ "  B  "
-                    , " B B "
-                    , "B W B"
-                    , " W W "
-                    , "  W  " ]
+board5x5B = mkBoard  board5x5
 
 -- | Tests the thing 
 --
