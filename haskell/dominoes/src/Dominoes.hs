@@ -1,34 +1,43 @@
+{-# LANGUAGE BangPatterns #-}
 module Dominoes (chain) where
 
 import Data.Tuple
 import Data.List
 import Data.Maybe
+import Debug.Trace
 
 type Domino = (Int,Int)
 
 chain :: [Domino] -> Maybe [Domino]
-chain [] = Just []
-chain ds = k . filter sameFirstLast . solver $ ds
-         where k [] = Nothing
-               k (x:_) = Just x
+chain = find sameFirstLast . solver
 
 sameFirstLast :: [Domino] -> Bool
-sameFirstLast [] = False
-sameFirstLast xs = (fst . head) xs == (snd . last) xs
+sameFirstLast [] = True
+sameFirstLast xs = fromMaybe False $
+                    uncons xs >>= \(d, _) ->
+                    unsnoc xs >>= \(_, d') ->
+                    pure (fst d == snd  d')
+    
+  where unsnoc = foldr (\x -> Just . maybe ([], x) (\(~(a, b)) -> (x : a, b))) Nothing
 
 
-appendToChain :: Domino -> [Domino] -> Maybe (Domino,[Domino])
-appendToChain d [] = Just (d,[d])
-appendToChain d@(l,r) ds@((l',_):_)  | l == l' = Just (d , swap d:ds)
-                                     | r == l' = Just (d, d:ds)
-                                     | otherwise = Nothing
+appendToChain :: [Domino] -> Domino -> Maybe (Domino, [Domino])
+appendToChain [] d = Just (d, [d])
+appendToChain ds d@(l,r) = do
+  top <- listToMaybe ds
+  check top
+    where check (l',_)
+            | l == l' = Just (d, swap d:ds)
+            | r == l' = Just (d, d:ds)
+            | otherwise = Nothing
 
 
 eligibleChainBuilder :: [Domino] -> [Domino] -> [(Domino, [Domino])]
-eligibleChainBuilder acc = mapMaybe (`appendToChain` acc)
+eligibleChainBuilder acc = mapMaybe (appendToChain acc)
+
 
 solver :: [Domino] -> [[Domino]]
-solver = go [] 
-      where go acc [] = pure acc
-            go acc ds = do (added, newAcc) <- eligibleChainBuilder acc ds
-                           go newAcc (delete added ds)
+solver = go []
+  where go !acc [] = pure (traceShowId acc)
+        go !acc !ds = do (d, newAcc) <- eligibleChainBuilder acc ds
+                         go newAcc (delete d ds)

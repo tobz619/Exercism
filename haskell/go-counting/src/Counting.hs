@@ -10,10 +10,9 @@ import qualified Data.Set as Set
 import Data.Sequence(Seq, ViewL(..))
 import qualified Data.Sequence as Seq
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe, mapMaybe, isNothing)
+import Data.Maybe (mapMaybe, isNothing)
 import Control.Monad.State
 import Control.Monad.Reader
-import Debug.Trace
 
 data Color = Black | White deriving (Eq, Ord, Show)
 type Coord = (Int, Int)
@@ -38,9 +37,6 @@ territoryFor board co = do c <- Map.lookup co (mkBoard board)
                              Nothing -> return $ evalState (territorySearch (mkBoard board) co) newBFS
                              _ -> Nothing
 
-neighbourCoords :: Coord -> [Coord]
-neighbourCoords (x,y) = [(x,y) | x' <- [x-1 .. x+1], y'<- [y-1 .. y+1] , (x,y) /= (x',y')]
-
 libertyCoords :: Coord -> [Coord]
 libertyCoords (x,y) = [(x, y-1), (x, y+1), (x+1, y), (x-1, y)]
 
@@ -56,8 +52,8 @@ mkBoard xs = Map.fromList $! go (1,1) (unlines xs) []
               go (x,y) (_:ys) acc = ((x,y), Nothing) : go (x+1, y) ys acc
 
 newBFSearch :: Coord -> State BFS ()
-newBFSearch co = modify (\bfs -> bfs { queue = searchFrom })
-    where searchFrom = Seq.singleton co
+newBFSearch co = modify (\bfs -> bfs { queue = Seq.singleton co })
+
 
 popQueue :: State (Seq Coord) (Maybe Coord)
 popQueue = do q <- gets Seq.viewl
@@ -88,21 +84,6 @@ capturedRegion board regionCoords  = let
                 | (Just White `elem` s) && (Just Black `notElem` s) = Just White
                 | otherwise = Nothing
 
-continueBFS :: Board -> State BFS (Set Coord, Maybe Color)
-continueBFS board = do
-    q <- gets queue
-    viewed <- gets seen
-    c <- gets connected
-    let (res, newQueue) = runState popQueue q
-    traceShowM newQueue
-    case res of
-        Nothing -> return (c, capturedRegion board c)
-        Just co -> do let newSeen = runReader (addToSeen co) viewed
-                          moreQueue = runReader (extendQueue neighbourCoords board newSeen co) newQueue
-                          newConnected = runReader (addToConnected co) c
-                      put $ BFS moreQueue newSeen newConnected
-                      continueBFS board
-
 territoryBFS :: Board -> State BFS (Set Coord, Maybe Color)
 territoryBFS board = do
     q <- gets queue
@@ -121,10 +102,6 @@ territorySearch :: Board -> Coord -> State BFS (Set Coord, Maybe Color)
 territorySearch board co = do newBFSearch co
                               territoryBFS board
 
-connectedSearch :: Board -> Coord -> State BFS (Set Coord, Maybe Color)
-connectedSearch board co = do newBFSearch co
-                              continueBFS board
-
 board5x5 :: [String]
 board5x5 =  [ "  B  "
             , " B B "
@@ -134,10 +111,3 @@ board5x5 =  [ "  B  "
 
 board5x5B :: Board
 board5x5B = mkBoard  board5x5
-
--- | Tests the thing 
---
--- >>> test
---
-test :: Int -> Int -> (Set Coord, Maybe Color)
-test x y = evalState (territorySearch board5x5B (x,y)) newBFS
