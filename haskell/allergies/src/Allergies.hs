@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Allergies (Allergen(..), allergies, isAllergicTo) where
 
 import Data.Maybe
@@ -23,14 +24,15 @@ isAllergicTo _ 0 = False
 isAllergicTo allergen score = allergen `elem` allergies score
 
 subtLargest :: Int -> [Allergen]
-subtLargest = unfoldr (`scoreBuilder` [Cats, Pollen .. Eggs]) 
+subtLargest = unfoldr (`scoreBuilder` [Cats, Pollen .. Eggs])
 
 scoreBuilder :: Int -> [Allergen] -> Maybe (Allergen, Int)
 scoreBuilder 0 _ = Nothing
 scoreBuilder _ [] = Nothing
-scoreBuilder score (x:xs) | lookup x mkAllergenScorePairs <= Just score = Just (x, score - fromJust (lookup x mkAllergenScorePairs))
-                          | otherwise = scoreBuilder score xs
+scoreBuilder score (x:xs)
+  | lookup x mkAllergenScorePairs <= Just score = Just (x,) <*> (flip subtract score <$> lookup x mkAllergenScorePairs)
+  | otherwise = scoreBuilder score xs
 
 
 mkAllergenScorePairs :: [(Allergen, Int)]
-mkAllergenScorePairs = zip [Eggs .. Cats] (1 : map (2^) [1..])
+mkAllergenScorePairs = zip [Eggs .. Cats] (1 : map (2^) ([1..] :: [Int]))
