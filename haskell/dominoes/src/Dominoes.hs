@@ -38,6 +38,6 @@ eligibleChainBuilder acc = mapMaybe (appendToChain acc)
 
 solver :: [Domino] -> [[Domino]]
 solver = go []
-  where go !acc [] = pure (traceShowId acc)
+  where go !acc [] = pure acc
         go !acc !ds = do (d, newAcc) <- eligibleChainBuilder acc ds
                          go newAcc (delete d ds)
