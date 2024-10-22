@@ -1,5 +1,5 @@
 module OCR (convert) where
-    
+
 import Data.List
 import Data.Char (intToDigit)
 
@@ -51,30 +51,40 @@ makeOCR '9' = lines " _ \n\
                     \ _|\n\
                     \   "
 
-
-ocrMaker :: [Char] -> [[[String]]]
-ocrMaker xs = go [] xs
-             where go acc (',':xs) = reverse acc : go [] xs
-                   go acc (x:xs)   = go (makeOCR x: acc) xs
-                   go acc []       = [reverse acc]
+makeOCR _ = []
 
 
-ocrRow :: [[[String]]] -> [[String]]
-ocrRow [] = []
-ocrRow (x:xs) = foldr1 (zipWith (++)) x : ocrRow xs
+
+prep :: String -> [String]
+prep = split ','
+      where split _ [] = []
+            split c xs = let
+             in case break (== c) xs of
+                  (chunk,[]) -> [chunk]
+                  (chunk,rest) -> chunk : split c (tail rest)
+
+ocrLine :: String -> [[String]]
+ocrLine = map makeOCR
+
+ocrRow :: [[String]] -> [[String]]
+ocrRow = foldr (zipWith (:)) [[],[],[],[]]
 
 
-ocr :: String -> String
-ocr =  concat . map unlines . ocrRow . ocrMaker
 
+ocr :: String -> [Char]
+ocr =  concatMap (unlines . map concat . ocrRow . ocrLine) . prep
+
+unocr :: [String] -> [Char]
 unocr = map ocrToText . unocrLine
 
+unocrLine :: [String] -> [[String]]
 unocrLine xs | all null xs = []
              | otherwise = map (take 3) xs : (unocrLine . map (drop 3)) xs
-        
+
 
 ocrToText :: [String] -> Char
 ocrToText xs = maybe '?'  intToDigit (elemIndex xs (map makeOCR "01234567890"))
 
 
+printOcrs :: String -> IO ()
 printOcrs = putStr . ocr
