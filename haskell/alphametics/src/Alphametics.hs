@@ -1,10 +1,11 @@
 {-# LANGUAGE BangPatterns #-}
 module Alphametics (solve) where
 
-import qualified Data.Map.Strict as Map
+import qualified Data.Map as Map
 import Data.List ( delete, nub, transpose, foldl', find)
 import Data.Char ( intToDigit, isAlpha )
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList, listToMaybe)
+import Control.Applicative (liftA2)
 import Text.Read (readMaybe)
 import Text.Megaparsec
     ( parse, many, (<|>), Parsec, MonadParsec(try) )
@@ -33,19 +34,18 @@ data Equation = Equation { eExpr :: Expr
 solve :: String -> Maybe [(Char, Int)]
 solve puzzle = let res = mkValuePair puzzle
                    col = mkColumns puzzle
-                   maps = maybe [] (\(cols, inpRes) -> loop addChars cols inpRes (initChars puzzle)) col
+                   maps = (\(cols, inpRes) -> loop addChars cols inpRes (initChars puzzle)) <$> col
 
-                in res >>= \(inpCol, resStr) -> getValidInp inpCol resStr maps
+                in res >>= \(inpCol, resStr) -> getValidInp inpCol resStr =<< maps
 
-setCharVariants :: Char -> PossibleChars -> Maybe [PossibleChars]
-setCharVariants c charMap = do lis <- Map.lookup c charMap
-                               return $! map (updateMap charMap c) lis
+setCharVariants :: Char -> PossibleChars -> [PossibleChars]
+setCharVariants c charMap = let lis = Map.lookup c charMap
+                             in maybe [] (map (updateMap charMap c)) lis
 
 
-setAllCharVariants :: String -> PossibleChars -> Maybe [PossibleChars]
-setAllCharVariants inpString !charMap = go inpString [charMap]
-    where go "" charMapList   = pure charMapList
-          go (s:str) charMapList  = traverse (setCharVariants s) charMapList >>= go str . concat
+setAllCharVariants :: String -> PossibleChars -> [PossibleChars]
+setAllCharVariants "" cmap = pure cmap
+setAllCharVariants (s:str) charMap = (setCharVariants s) charMap >>= setAllCharVariants (delete s str)
 
 
 updateMap :: PossibleChars -> Char -> Int -> PossibleChars
@@ -57,35 +57,35 @@ updateMap mp c i = setChar c i mp
                         | key == toChange = [v]
                         | otherwise = delete v xs
 
-validAdd :: String -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]
-validAdd cs resChar carry charMap = do
-    as <- traverse (`Map.lookup` charMap) cs
-    resVals <- resChar `Map.lookup` charMap
+validAdd :: String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]
+validAdd cs resChar carry charMap = let 
+    as = fromMaybe [] $ traverse (\x -> fmap ((,) x) <$> x `Map.lookup` charMap) cs
+    resVals = fromMaybe [] $ resChar `Map.lookup` charMap
 
-    return [ ( c, toReturn ) |
+    in [ ( c, traceShowId toReturn ) |
         v1 <- sequence as,
-        let (c, resDig) = (`divMod` 10) . (carry +) $ sum v1,
+        let (vals, c, resDig) = let (car,dig) = (`divMod` 10) . (carry +) $ sum (map snd v1)
+                                 in (,,) v1 car dig,
         resDig `elem` resVals,
-        let toReturn = updateMap charMap resChar resDig
+        let updateResDig = updateMap charMap resChar resDig,
+        let toReturn = foldr (\ ~(ch, v) mp -> updateMap mp ch v) updateResDig vals
         ]
 
-
-addChars :: String -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]
+addChars :: String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]
 addChars cs resChar carry charMap =
     let eligMaps = setAllCharVariants (resChar: cs) charMap
-    in concat . mapMaybe (validAdd cs resChar carry) <$> eligMaps
+    in concat . map (validAdd cs resChar carry) $ eligMaps
 
-processFun :: (String  -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)])
+processFun :: (String  -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)])
             -> String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]
-processFun f str ch car charMap = mapMaybe checkNull results
-        where results = fromMaybe [] $ f str ch car charMap
-              checkNull (c,mp) = (,) c <$> traverse (\x -> if null x then Nothing else Just x) mp
+processFun f str ch car charMap = filter (not . null) results
+        where results = f str ch car charMap
 
-loop :: (String -> Char -> Int -> PossibleChars -> Maybe [(Int, PossibleChars)]) -> [String] -> [Char] -> PossibleChars -> [Map.Map Char [Int]]
+loop :: (String -> Char -> Int -> PossibleChars -> [(Int, PossibleChars)]) -> [String] -> [Char] -> PossibleChars -> [PossibleChars]
 loop = go 0
     where go _ _ _ [] mp = pure mp
           go _ _ [] _ mp = pure mp
-          go carry f (s:strs) (c:chrs) !charMap = let
+          go carry f (s:strs) (c:chrs) charMap = let
             !carryRes = processFun f s c carry charMap
             in concatMap (\ ~(newCar, newMap) -> go newCar f strs chrs newMap) carryRes
 
@@ -103,7 +103,7 @@ pairColumns inps = unzip . uncurry zip . standardiseInps inps
 
 
 initChars :: String -> Map.Map Char [Int]
-initChars xs = Map.insert ' ' [0] $ foldr initiator Map.empty ((nub.filter isAlpha) xs)
+initChars xs = Map.insert ' ' [0] $ foldr initiator Map.empty ((nub. filter isAlpha) xs)
         where initiator x = Map.insert x [0..9]
 
 
@@ -162,4 +162,8 @@ mkColumns = fmap (uncurry pairColumns). mkValuePair
 
 stupidThing = "THIS + A + FIRE + THEREFORE + FOR + ALL + HISTORIES + I + TELL + A + TALE + THAT + FALSIFIES + ITS + TITLE + TIS + A + LIE + THE + TALE + OF + THE + LAST + FIRE + HORSES + LATE + AFTER + THE + FIRST + FATHERS + FORESEE + THE + HORRORS + THE + LAST + FREE + TROLL + TERRIFIES + THE + HORSES + OF + FIRE + THE + TROLL + RESTS + AT + THE + HOLE + OF + LOSSES + IT + IS + THERE + THAT + SHE + STORES + ROLES + OF + LEATHERS + AFTER + SHE + SATISFIES + HER + HATE + OFF + THOSE + FEARS + A + TASTE + RISES + AS + SHE + HEARS + THE + LEAST + FAR + HORSE + THOSE + FAST + HORSES + THAT + FIRST + HEAR + THE + TROLL + FLEE + OFF + TO + THE + FOREST + THE + HORSES + THAT + ALERTS + RAISE + THE + STARES + OF + THE + OTHERS + AS + THE + TROLL + ASSAILS + AT + THE + TOTAL + SHIFT + HER + TEETH + TEAR + HOOF + OFF + TORSO + AS + THE + LAST + HORSE + FORFEITS + ITS + LIFE + THE + FIRST + FATHERS + HEAR + OF + THE + HORRORS + THEIR + FEARS + THAT + THE + FIRES + FOR + THEIR + FEASTS + ARREST + AS + THE + FIRST + FATHERS + RESETTLE + THE + LAST + OF + THE + FIRE + HORSES + THE + LAST + TROLL + HARASSES + THE + FOREST + HEART + FREE + AT + LAST + OF + THE + LAST + TROLL + ALL + OFFER + THEIR + FIRE + HEAT + TO + THE + ASSISTERS + FAR + OFF + THE + TROLL + FASTS + ITS + LIFE + SHORTER + AS + STARS + RISE + THE + HORSES + REST + SAFE + AFTER + ALL + SHARE + HOT + FISH + AS + THEIR + AFFILIATES + TAILOR + A + ROOFS + FOR + THEIR + SAFE == FORTRESSES"
 
-ex1 =  solve stupidThing
+ex1 = solve stupidThing
+ex2 = solve "AND + A + STRONG + OFFENSE + AS + A + GOOD == DEFENSE"
+ex3 = solve "SEND + MORE == MONEY"
+ex4 = solve "A + A + A + A + A + A + A + A + A + A + A + B == BCC"
+ex5 = solve "A+B+C+D+E+F+G+H+I == AJ"

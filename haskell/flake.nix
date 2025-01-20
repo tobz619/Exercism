@@ -2,13 +2,12 @@
   description = "Exercism development flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     hpkg.url = "github:nixos/nixpkgs?ref=50a7139fbd1acd4a3d4cfa695e694c529dd26f3a";
   };
 
-  outputs = { self, nixpkgs, hpkg }: 
+  outputs = { self, hpkg}: 
   let
-    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    pname = builtins.toString (builtins.baseNameOf ./.);
     hpkgs = hpkg.legacyPackages.x86_64-linux; 
     compiler = "ghc928";
     hl = hpkgs.haskell.packages."${compiler}";
@@ -16,36 +15,20 @@
     project = name: devTools:
       hl.developPackage {
         inherit name;
-        root = pkgs.lib.sourceFilesBySuffices (./. + "/${name}")  [".cabal" ".hs"];
+        root = hpkgs.lib.sourceFilesBySuffices (./. + "/${name}")  [".cabal" ".hs"];
         returnShellEnv = !(devTools == []);
       };
 
   in
-  {
-    packages.pkg = name: project name [];
+ rec {
+    packages.pkg = project pname devShell.buildInputs;
    
-    defaultPackage = self.package.x86_64-linux.pkg;
+    # defaultPackage = nixpkgs.packages.x86_64-linux;
 
-    devShell = name: hl.shellFor rec{
-      inherit name;
-      packages = p: [];
+    devShell = hpkgs.callPackage ./shellmaker.nix {pkgs = hpkgs; shell-dir = (builtins.toString ./. + "/${pname}"); };
 
-      buildInputs = (with hl; [
-        pkgs.bashInteractive
-        cabal-fmt
-        cabal-install
-        haskell-language-server
-        hlint
-        hoogle
-        ormolu
-        ghc
-        ghcid
-        implicit-hie
-        retrie
-      ]);
-
-    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
+    LD_LIBRARY_PATH = hpkgs.lib.makeLibraryPath devShell.buildInputs;
     
-    };
+    
   };
 }

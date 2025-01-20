@@ -25,11 +25,20 @@ makeOCR '2' = [" _ "
               ,"|_ "
               ,"   "]
 
-makeOCR '3' = lines  " _ \n _|\n _|\n   "
+makeOCR '3' = lines  " _ \n\
+                     \ _|\n\
+                     \ _|\n\
+                     \   "
 
-makeOCR '4' = lines "   \n|_|\n  |\n   "
+makeOCR '4' = lines "   \n\
+                    \|_|\n\
+                    \  |\n\
+                    \   "
 
-makeOCR '5' = lines " _ \n|_ \n _|\n   "
+makeOCR '5' = lines " _ \n\
+                    \|_ \n\
+                    \ _|\n\
+                    \   "
 
 makeOCR '6' = lines " _ \n\
                     \|_ \n\
@@ -63,16 +72,14 @@ prep = split ','
                   (chunk,[]) -> [chunk]
                   (chunk,rest) -> chunk : split c (tail rest)
 
-ocrLine :: String -> [[String]]
-ocrLine = map makeOCR
 
 ocrRow :: [[String]] -> [[String]]
 ocrRow = foldr (zipWith (:)) [[],[],[],[]]
 
 
 
-ocr :: String -> [Char]
-ocr =  concatMap (unlines . map concat . ocrRow . ocrLine) . prep
+ocr :: String -> String
+ocr =  concatMap (unlines . map concat . ocrRow . map makeOCR) . prep
 
 unocr :: [String] -> [Char]
 unocr = map ocrToText . unocrLine
@@ -83,7 +90,7 @@ unocrLine xs | all null xs = []
 
 
 ocrToText :: [String] -> Char
-ocrToText xs = maybe '?'  intToDigit (elemIndex xs (map makeOCR "01234567890"))
+ocrToText xs = maybe '?'  intToDigit (elemIndex xs (map makeOCR "0123456789"))
 
 
 printOcrs :: String -> IO ()

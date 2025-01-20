@@ -3,26 +3,28 @@
 }:
 
 let
-  pname = builtins.baseNameOf (builtins.toString shell-dir);
-
+  pname = builtins.toString (builtins.baseNameOf shell-dir);
+  compiler = "ghc928";
 in
 
-pkgs.haskell.packages.ghc928.shellFor {
-  packages = hpkgs: [
-    hpkgs.distribution-nixpkgs
-    ( hpkgs.callPackage (shell-dir + "/${pname}.nix") {} )
-  ];
+pkgs.haskell.packages.${compiler}.shellFor rec {
+  
+  packages = ps: [ 
+    ps.distribution-nixpkgs (ps.callPackage "${shell-dir}/${pname}.nix" { })
+  ]; 
 
   nativeBuildInputs = with pkgs; [
     cabal-install
-    haskell.packages.ghc928.haskell-language-server
     cabal2nix
+    ghcid
     stack
+    haskell.packages.${compiler}.haskell-language-server
   ];
 
   shellHook = '' 
+    echo "... in ${shell-dir} ..."
     echo "... updating ${pname}.nix ..."
-    cabal2nix ${shell-dir} > ${pname}.nix  
+    ${pkgs.cabal2nix}/bin/cabal2nix ${shell-dir} > ${shell-dir}/${pname}.nix  
   '';
   
   distribution_nixpkgs_datadir = toString ./distribution-nixpkgs;
